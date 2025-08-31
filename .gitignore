@@ -1,5 +1,2 @@
 node_modules/
-dist/
-.env
-.DS_Store
-pnpm-lock.yaml
+client/node_modules/

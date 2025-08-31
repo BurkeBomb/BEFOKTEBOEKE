@@ -1,38 +1,33 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export async function apiRequest(
-  methodOrPath: string,
-  pathOrMethod?: string,
-  data?: any
+  url: string,
+  method: string = 'GET',
+  data?: unknown,
 ) {
-  let method = "GET";
-  let path = "";
-
-  if (pathOrMethod && (pathOrMethod.startsWith("/") || pathOrMethod.startsWith("http"))) {
-    method = methodOrPath;
-    path = pathOrMethod;
-  } else {
-    path = methodOrPath;
-    method = pathOrMethod ?? "GET";
-  }
-
-  const res = await fetch(path, {
+  const options: RequestInit = {
     method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: data ? { 'Content-Type': 'application/json' } : undefined,
     body: data ? JSON.stringify(data) : undefined,
-  });
-
+  };
+  const res = await fetch(url, options);
   if (!res.ok) {
-    throw new Error(await res.text());
+    const error = new Error('API request failed');
+    (error as any).status = res.status;
+    throw error;
   }
-
-  try {
-    return await res.json();
-  } catch {
-    return undefined;
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return res.json();
   }
+  return res.text();
 }
