@@ -110,7 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use AI to predict genre if description is provided
       if (validatedData.description && validatedData.description.trim().length > 0) {
         try {
-          // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+          // Do not change this unless explicitly requested by the user.
           const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -927,7 +928,8 @@ Year: ${validatedData.year || "Unknown"}`,
         return res.status(400).json({ message: "No image provided" });
       }
 
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+      // Do not change this unless explicitly requested by the user.
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -1079,7 +1081,8 @@ Year: ${validatedData.year || "Unknown"}`,
       // 3. Use AI as fallback to generate likely book info
       if (!bookInfo) {
         try {
-          // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+          // Do not change this unless explicitly requested by the user.
           const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
