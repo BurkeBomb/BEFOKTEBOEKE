@@ -24,4 +24,30 @@ describe('apiRequest', () => {
     vi.stubGlobal('fetch', mockFetch as any);
     await expect(apiRequest('/test')).rejects.toMatchObject({ status: 500 });
   });
+
+  it('returns parsed json for application/json responses', async () => {
+    const mockJson = { hello: 'world' };
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      json: vi.fn().mockResolvedValue(mockJson),
+      text: vi.fn(),
+    });
+    vi.stubGlobal('fetch', mockFetch as any);
+    const data = await apiRequest('/test');
+    expect(data).toEqual(mockJson);
+  });
+
+  it('returns text for non-json responses', async () => {
+    const mockText = 'ok';
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'text/plain' },
+      json: vi.fn(),
+      text: vi.fn().mockResolvedValue(mockText),
+    });
+    vi.stubGlobal('fetch', mockFetch as any);
+    const data = await apiRequest('/test');
+    expect(data).toBe(mockText);
+  });
 });
