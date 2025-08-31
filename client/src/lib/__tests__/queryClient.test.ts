@@ -6,6 +6,12 @@ describe('queryClient', () => {
   it('initializes a QueryClient instance', () => {
     expect(queryClient).toBeInstanceOf(QueryClient);
   });
+
+  it('uses default retry and refetch settings', () => {
+    const defaults = queryClient.getDefaultOptions();
+    expect(defaults.queries?.retry).toBe(1);
+    expect(defaults.queries?.refetchOnWindowFocus).toBe(false);
+  });
 });
 
 describe('apiRequest', () => {
