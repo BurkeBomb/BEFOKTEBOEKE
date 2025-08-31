@@ -8,6 +8,11 @@ describe('isUnauthorizedError', () => {
     expect(isUnauthorizedError(err)).toBe(true);
   });
 
+  it('returns true for messages containing "unauthorized"', () => {
+    const err = new Error('User Unauthorized');
+    expect(isUnauthorizedError(err)).toBe(true);
+  });
+
   it('returns false for other errors', () => {
     const err = new Error('Forbidden');
     (err as any).status = 403;
