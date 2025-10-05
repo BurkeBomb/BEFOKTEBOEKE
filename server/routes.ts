@@ -565,7 +565,7 @@ Year: ${validatedData.year || "Unknown"}`,
   });
 
   // Premium Subscription Routes
-  app.get("/api/subscription/status", isAuthenticated, async (req, res) => {
+  app.get("/api/subscription/status", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
@@ -883,7 +883,8 @@ Year: ${validatedData.year || "Unknown"}`,
       res.json(registration);
     } catch (error) {
       console.error("Error registering for event:", error);
-      res.status(500).json({ message: error.message || "Failed to register for event" });
+      const message = error instanceof Error && error.message ? error.message : "Failed to register for event";
+      res.status(500).json({ message });
     }
   });
 

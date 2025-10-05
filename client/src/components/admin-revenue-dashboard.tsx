@@ -3,12 +3,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, MousePointer, Eye, Calendar } from "lucide-react";
 
+interface RevenueStats {
+  totalRevenue: number;
+  totalClicks: number;
+  totalImpressions: number;
+  activeAds: number;
+  revenueGrowth: number;
+  clickGrowth: number;
+  impressionGrowth: number;
+  newAdsThisMonth: number;
+}
+
+interface TopAd {
+  id: string;
+  title: string;
+  advertiser: string;
+  position: string;
+  clicks: number;
+  impressions: number;
+  revenue: number;
+  ctr: string | number;
+}
+
 export default function AdminRevenueDashboard() {
-  const { data: revenueStats, isLoading } = useQuery({
+  const { data: revenueStats, isLoading } = useQuery<RevenueStats>({
     queryKey: ["/api/admin/revenue/stats"],
   });
 
-  const { data: topAds } = useQuery({
+  const { data: topAds = [] } = useQuery<TopAd[]>({
     queryKey: ["/api/admin/revenue/top-ads"],
   });
 
@@ -116,9 +138,9 @@ export default function AdminRevenueDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topAds?.map((ad: any, index: number) => (
-              <div 
-                key={ad.id} 
+            {topAds.map((ad, index) => (
+              <div
+                key={ad.id}
                 className="flex items-center justify-between p-4 border border-border rounded-lg"
               >
                 <div className="flex items-center space-x-4">
@@ -148,9 +170,9 @@ export default function AdminRevenueDashboard() {
                     </p>
                     <p className="text-muted-foreground">Inkomste</p>
                   </div>
-                  <Badge 
-                    variant={ad.ctr > 2 ? "default" : "secondary"}
-                    className={ad.ctr > 2 ? "bg-primary" : ""}
+                  <Badge
+                    variant={Number(ad.ctr) > 2 ? "default" : "secondary"}
+                    className={Number(ad.ctr) > 2 ? "bg-primary" : ""}
                   >
                     {ad.ctr}% CTR
                   </Badge>

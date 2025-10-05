@@ -34,6 +34,17 @@ interface BookRecommendation {
   description?: string;
 }
 
+interface AffiliatePartnerStats {
+  totalCommission: number;
+  commissionGrowth: number;
+  totalClicks: number;
+  clickGrowth: number;
+  conversionRate: number;
+  conversionGrowth: number;
+  totalSales: number;
+  salesThisMonth: number;
+}
+
 export default function AffiliateMarketing() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
@@ -42,7 +53,7 @@ export default function AffiliateMarketing() {
     queryKey: ["/api/affiliate/recommendations"],
   });
 
-  const { data: partnerStats } = useQuery({
+  const { data: partnerStats } = useQuery<AffiliatePartnerStats>({
     queryKey: ["/api/affiliate/stats"],
   });
 
@@ -75,17 +86,18 @@ export default function AffiliateMarketing() {
   };
 
   const handleAffiliateClick = (book: BookRecommendation) => {
-    trackClickMutation.mutate({ 
-      bookId: book.id, 
-      affiliateUrl: book.affiliateUrl 
+    trackClickMutation.mutate({
+      bookId: book.id,
+      affiliateUrl: book.affiliateUrl
     });
-    window.open(book.affiliateUrl, '_blank');
+    window.open(book.affiliateUrl, "_blank");
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('af-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
+  const formatCurrency = (amountInCents: number) => {
+    const amount = amountInCents / 100;
+    return new Intl.NumberFormat("af-ZA", {
+      style: "currency",
+      currency: "ZAR",
     }).format(amount);
   };
 
