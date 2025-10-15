@@ -2,27 +2,47 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
-  MapPin, 
+import {
+  TrendingUp,
+  Users,
+  BookOpen,
+  MapPin,
   Calendar,
   BarChart3,
   PieChart,
   Target
 } from "lucide-react";
 
+interface UserAnalytics {
+  activeUsers: number;
+  userGrowth: number;
+  avgSessionTime: string;
+  sessionGrowth: number;
+  returnRate: number;
+  returnGrowth: number;
+  peakHours: Array<{ time: string; usage: number }>;
+  deviceTypes: Array<{ type: string; percentage: number }>;
+}
+
+interface BookAnalytics {
+  popularBooks: Array<{ id: string; title: string; author: string; collections: number }>;
+  genreDistribution: Array<{ name: string; percentage: number }>;
+}
+
+interface GeographicAnalytics {
+  regions: Array<{ name: string; users: number; growth: number }>;
+}
+
 export default function AdvancedAnalytics() {
-  const { data: userAnalytics, isLoading } = useQuery({
+  const { data: userAnalytics, isLoading } = useQuery<UserAnalytics>({
     queryKey: ["/api/admin/analytics/users"],
   });
 
-  const { data: bookAnalytics } = useQuery({
+  const { data: bookAnalytics } = useQuery<BookAnalytics>({
     queryKey: ["/api/admin/analytics/books"],
   });
 
-  const { data: geographicData } = useQuery({
+  const { data: geographicData } = useQuery<GeographicAnalytics>({
     queryKey: ["/api/admin/analytics/geographic"],
   });
 

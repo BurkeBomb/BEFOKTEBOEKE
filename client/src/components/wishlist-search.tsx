@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { Book } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Search, ExternalLink, ShoppingCart, Loader2 } from "lucide-react";
@@ -7,11 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+interface WishlistSearchResult {
+  book: Book;
+  suggestedSites: Array<{ name: string; url: string }>;
+  searchUrls: Array<{ query: string; url: string }>;
+}
+
 export default function WishlistSearch() {
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
-  const { data: searchResults, refetch, isLoading, error } = useQuery({
+  const { data: searchResults, refetch, isLoading, error } = useQuery<WishlistSearchResult[]>({
     queryKey: ["/api/wishlist/search-online"],
     enabled: false, // Don't auto-fetch, only on manual trigger
     retry: false,
@@ -61,9 +68,9 @@ export default function WishlistSearch() {
         </Button>
       </div>
 
-      {searchResults && searchResults.length > 0 && (
+      {Array.isArray(searchResults) && searchResults.length > 0 && (
         <div className="grid gap-4">
-          {searchResults.map((result: any, index: number) => (
+          {searchResults.map((result) => (
             <Card key={result.book.id} className="border border-slate-200">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -84,13 +91,13 @@ export default function WishlistSearch() {
                     Aanbevole Webwerwe:
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {result.suggestedSites.map((site: any, siteIndex: number) => (
+                    {result.suggestedSites.map((site, siteIndex) => (
                       <Button
                         key={siteIndex}
                         variant="outline"
                         size="sm"
                         className="justify-start text-left h-auto p-2"
-                        onClick={() => window.open(site.url, '_blank')}
+                        onClick={() => window.open(site.url, "_blank")}
                       >
                         <ShoppingCart className="h-3 w-3 mr-2 flex-shrink-0" />
                         <span className="truncate">{site.name}</span>
@@ -105,13 +112,13 @@ export default function WishlistSearch() {
                     Google Soekresultate:
                   </h4>
                   <div className="space-y-1">
-                    {result.searchUrls.slice(0, 2).map((search: any, searchIndex: number) => (
+                    {result.searchUrls.slice(0, 2).map((search, searchIndex) => (
                       <Button
                         key={searchIndex}
                         variant="ghost"
                         size="sm"
                         className="justify-start text-left h-auto p-2 w-full"
-                        onClick={() => window.open(search.url, '_blank')}
+                        onClick={() => window.open(search.url, "_blank")}
                       >
                         <Search className="h-3 w-3 mr-2 flex-shrink-0" />
                         <span className="text-xs text-slate-600 truncate">
@@ -128,7 +135,7 @@ export default function WishlistSearch() {
         </div>
       )}
 
-      {searchResults && searchResults.length === 0 && (
+      {Array.isArray(searchResults) && searchResults.length === 0 && (
         <div className="text-center py-8 bg-slate-50 rounded-lg">
           <ShoppingCart className="mx-auto h-12 w-12 text-slate-400" />
           <h3 className="mt-2 text-sm font-medium text-slate-900">Geen wenslys items nie</h3>

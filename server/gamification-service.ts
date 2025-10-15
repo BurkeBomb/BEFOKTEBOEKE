@@ -111,7 +111,8 @@ export class GamificationService {
         // Check for new achievements
         await this.checkAndUnlockAchievements(userId);
         
-        return { pointsEarned, newLevel, leveledUp: newLevel > currentUser.currentLevel };
+        const currentLevel = currentUser.currentLevel ?? 1;
+        return { pointsEarned, newLevel, leveledUp: newLevel > currentLevel };
       }
       
       return { pointsEarned, newLevel: 1, leveledUp: false };

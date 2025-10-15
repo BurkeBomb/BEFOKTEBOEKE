@@ -373,7 +373,7 @@ export class DatabaseStorage implements IStorage {
     
     return allEvents.map(event => ({
       ...event,
-      price: event.price / 100, // Convert from cents
+      price: (event.price ?? 0) / 100, // Convert from cents
     }));
   }
 
@@ -383,7 +383,7 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...event,
-      price: event.price / 100,
+      price: (event.price ?? 0) / 100,
     };
   }
 
@@ -459,7 +459,7 @@ export class DatabaseStorage implements IStorage {
 
     return userRegistrations.map(({ event, registration }) => ({
       ...event,
-      price: event.price / 100,
+      price: (event.price ?? 0) / 100,
       registrationStatus: registration.status,
       registeredAt: registration.registeredAt,
     }));

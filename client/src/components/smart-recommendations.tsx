@@ -27,6 +27,13 @@ interface Recommendation {
   isDismissed: boolean;
 }
 
+interface RecommendationStats {
+  total: number;
+  thisWeek: number;
+  accuracy: number;
+  additionRate: number;
+}
+
 export default function SmartRecommendations() {
   const { toast } = useToast();
 
@@ -34,7 +41,7 @@ export default function SmartRecommendations() {
     queryKey: ["/api/recommendations"],
   });
 
-  const { data: recommendationStats } = useQuery({
+  const { data: recommendationStats } = useQuery<RecommendationStats>({
     queryKey: ["/api/recommendations/stats"],
   });
 
