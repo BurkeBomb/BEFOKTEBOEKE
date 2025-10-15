@@ -28,6 +28,13 @@ interface Recommendation {
   isDismissed: boolean;
 }
 
+interface RecommendationStats {
+  total: number;
+  thisWeek: number;
+  accuracy: number;
+  additionRate: number;
+}
+
 export default function SmartRecommendations() {
   const { toast } = useToast();
 

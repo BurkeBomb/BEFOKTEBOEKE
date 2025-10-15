@@ -1,199 +1,178 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Book } from "@shared/schema";
-import { Plus, RefreshCcw } from "lucide-react";
+import type { Book } from "@shared/schema";
 import NavigationBar from "@/components/navigation-bar";
 import StatsCards from "@/components/stats-cards";
-import AddBookDialog from "@/components/add-book-dialog";
-import BookCard from "@/components/book-card";
-import BookShareModal from "@/components/book-share-modal";
+import SearchFilters from "@/components/search-filters";
 import WishlistSection from "@/components/wishlist-section";
-import WishlistSearch from "@/components/wishlist-search";
-import SmartRecommendations from "@/components/smart-recommendations";
-import ReadingProgressTracker from "@/components/reading-progress-tracker";
 import AchievementsPanel from "@/components/achievements-panel";
+import SmartRecommendations from "@/components/smart-recommendations";
+import Advertisement from "@/components/advertisement";
 import AffiliateMarketing from "@/components/affiliate-marketing";
-import AdvertisementComponent from "@/components/advertisement";
+import BookCard from "@/components/book-card";
+import AddBookDialog from "@/components/add-book-dialog";
+import AddBookModal from "@/components/add-book-modal";
+import BookShareModal from "@/components/book-share-modal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useTranslation } from "@/components/language-provider";
+import { Card, CardContent } from "@/components/ui/card";
+import { BookPlus, Share2, Sparkles } from "lucide-react";
 
-type StatsResponse = {
+interface StatsResponse {
   totalBooks: number;
   wishlistCount: number;
   rareBooks: number;
   genreCount: number;
-  genreDistribution: Record<string, number>;
-};
+}
 
 export default function Home() {
-  const t = useTranslation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [genreFilter, setGenreFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("title");
+  const [isAIAddOpen, setAIAddOpen] = useState(false);
   const [shareBook, setShareBook] = useState<Book | null>(null);
 
-  const statsQuery = useQuery<StatsResponse>({
-    queryKey: ["/api/stats"],
-  });
-
-  const booksQuery = useQuery<Book[]>({
+  const { data: books = [], isPending: isBooksPending } = useQuery<Book[]>({
     queryKey: ["/api/books"],
   });
 
-  const latestBooks = useMemo(() => {
-    if (!booksQuery.data) return [] as Book[];
-    return [...booksQuery.data].sort((a, b) => {
-      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return bDate - aDate;
-    }).slice(0, 6);
-  }, [booksQuery.data]);
+  const { data: stats } = useQuery<StatsResponse>({
+    queryKey: ["/api/stats"],
+  });
 
-  const currentReadingBook = useMemo(() => {
-    return booksQuery.data?.find((book) => book.readingStatus === "reading") ?? null;
-  }, [booksQuery.data]);
+  const filteredBooks = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    let result = books;
+
+    if (normalizedQuery) {
+      result = result.filter((book) => {
+        const haystack = `${book.title} ${book.author} ${book.genre} ${book.description ?? ""}`.toLowerCase();
+        return haystack.includes(normalizedQuery);
+      });
+    }
+
+    if (genreFilter !== "all") {
+      result = result.filter((book) => book.genre === genreFilter);
+    }
+
+    return [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "author":
+          return a.author.localeCompare(b.author);
+        case "year":
+          return (b.year ?? 0) - (a.year ?? 0);
+        case "genre":
+          return a.genre.localeCompare(b.genre);
+        default:
+          return a.title.localeCompare(b.title);
+      }
+    });
+  }, [books, genreFilter, searchQuery, sortBy]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-6xl mx-auto px-4 py-10 space-y-12">
-        <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <section className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900">
-              {t.dashboardHeading}
+            <p className="text-sm uppercase tracking-widest text-muted-foreground">Welkom terug</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">
+              Jou Afrikaanse boekversameling
             </h1>
-            <p className="text-slate-600 max-w-2xl">
-              {t.dashboardSubheading}
+            <p className="text-muted-foreground mt-3 max-w-2xl">
+              Gebruik AI om boeke te katalogiseer, ontdek nuwe aanbevelings en hou jou wenslys dop.
             </p>
           </div>
-          <AddBookDialog
-            trigger={
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Voeg boek by
-              </Button>
-            }
-          />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <AddBookDialog
+              trigger={
+                <Button className="h-12 px-5 font-medium flex items-center space-x-2">
+                  <BookPlus className="h-5 w-5" />
+                  <span>Voeg Boek By</span>
+                </Button>
+              }
+            />
+            <Button
+              variant="outline"
+              className="h-12 px-5 font-medium flex items-center space-x-2"
+              onClick={() => setAIAddOpen(true)}
+            >
+              <Sparkles className="h-5 w-5" />
+              <span>AI Voeg Boek</span>
+            </Button>
+          </div>
         </section>
 
-        <StatsCards stats={statsQuery.data} />
+        <StatsCards stats={stats} />
 
-        <section className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-semibold text-slate-900">
-                  {t.latestBooks}
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => booksQuery.refetch()}
-                  disabled={booksQuery.isFetching}
-                  className="text-slate-500 hover:text-slate-900"
-                >
-                  <RefreshCcw className={`h-4 w-4 mr-2 ${booksQuery.isFetching ? "animate-spin" : ""}`} />
-                  {booksQuery.isFetching ? t.refresh : t.refresh}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {booksQuery.isLoading && (
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <Skeleton key={index} className="h-72 rounded-xl" />
-                    ))}
-                  </div>
-                )}
+        <SearchFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          genreFilter={genreFilter}
+          onGenreChange={setGenreFilter}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
 
-                {booksQuery.isError && (
-                  <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
-                    <p className="text-slate-600">Kon nie boeke laai nie.</p>
-                    <Button onClick={() => booksQuery.refetch()} variant="outline">
-                      {t.tryAgain}
-                    </Button>
-                  </div>
-                )}
-
-                {!booksQuery.isLoading && !booksQuery.isError && latestBooks.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-                    <p className="text-lg font-medium text-slate-700">{t.emptyLibraryCta}</p>
-                    <AddBookDialog
-                      trigger={
-                        <Button size="sm" variant="secondary" className="bg-purple-100 text-purple-700">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Voeg nou by
-                        </Button>
-                      }
-                    />
-                  </div>
-                )}
-
-                {!booksQuery.isLoading && !booksQuery.isError && latestBooks.length > 0 && (
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {latestBooks.map((book) => (
-                      <BookCard key={book.id} book={book} onShare={setShareBook} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-slate-900">
-                  Wenslys hulpmiddels
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <WishlistSection />
-                <WishlistSearch />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <SmartRecommendations />
-            {currentReadingBook ? (
-              <ReadingProgressTracker
-                bookId={currentReadingBook.id}
-                bookTitle={currentReadingBook.title}
-                totalPages={currentReadingBook.pageCount ?? undefined}
-                currentPages={0}
-                readingStatus={(currentReadingBook.readingStatus as "unread" | "reading" | "read") ?? "unread"}
-                onStatusUpdate={() => {
-                  booksQuery.refetch();
-                  statsQuery.refetch();
-                }}
-              />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-slate-900">
-                    Geen aktiewe leeswerk
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-slate-600">
-                  Begin 'n boek om jou leesvordering hier dop te hou.
+        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+          <div className="space-y-8">
+            <Advertisement position="banner" className="hidden lg:block" />
+            {isBooksPending ? (
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="h-full animate-pulse">
+                    <CardContent className="p-0">
+                      <div className="h-64 bg-muted" />
+                      <div className="p-4 space-y-3">
+                        <div className="h-4 bg-muted rounded" />
+                        <div className="h-3 bg-muted rounded w-1/2" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredBooks.length === 0 ? (
+              <Card className="border-dashed border-2 border-muted-foreground/20">
+                <CardContent className="py-16 text-center space-y-3">
+                  <Share2 className="h-10 w-10 mx-auto text-muted-foreground" />
+                  <h2 className="text-lg font-semibold text-foreground">Geen boeke gevind nie</h2>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    Pas jou filters aan of voeg jou eerste boek by met die AI hulpmiddel.
+                  </p>
                 </CardContent>
               </Card>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredBooks.map((book) => (
+                  <BookCard key={book.id} book={book} onShare={setShareBook} />
+                ))}
+              </div>
             )}
-            <AchievementsPanel />
+
+            <SmartRecommendations />
             <AffiliateMarketing />
-            <AdvertisementComponent position="sidebar" />
           </div>
-        </section>
+
+          <div className="space-y-8">
+            <WishlistSection />
+            <AchievementsPanel />
+            <Advertisement position="sidebar" />
+          </div>
+        </div>
       </main>
 
-      {shareBook ? (
+      {shareBook && (
         <BookShareModal
           open={Boolean(shareBook)}
           onOpenChange={(open) => {
-            if (!open) {
-              setShareBook(null);
-            }
+            if (!open) setShareBook(null);
           }}
           book={shareBook}
         />
-      ) : null}
+      )}
+
+      <AddBookModal isOpen={isAIAddOpen} onClose={() => setAIAddOpen(false)} />
     </div>
   );
 }

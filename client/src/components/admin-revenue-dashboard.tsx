@@ -1,25 +1,38 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, MousePointer, Eye, Calendar } from "lucide-react";
-import type { RevenueStats, TopAdPerformance } from "@/types/api";
+
+interface RevenueStats {
+  totalRevenue: number;
+  totalClicks: number;
+  totalImpressions: number;
+  activeAds: number;
+  revenueGrowth: number;
+  clickGrowth: number;
+  impressionGrowth: number;
+  newAdsThisMonth: number;
+}
+
+interface TopAd {
+  id: string;
+  title: string;
+  advertiser: string;
+  position: string;
+  clicks: number;
+  impressions: number;
+  revenue: number;
+  ctr: string | number;
+}
 
 export default function AdminRevenueDashboard() {
   const { data: revenueStats, isLoading } = useQuery<RevenueStats>({
     queryKey: ["/api/admin/revenue/stats"],
   });
 
-  const { data: topAdsData } = useQuery<TopAdPerformance[]>({
+  const { data: topAds = [] } = useQuery<TopAd[]>({
     queryKey: ["/api/admin/revenue/top-ads"],
   });
-
-  const topAds = useMemo(() => {
-    return (topAdsData ?? []).map((ad) => ({
-      ...ad,
-      ctr: typeof ad.ctr === "string" ? Number(ad.ctr) : ad.ctr,
-    }));
-  }, [topAdsData]);
 
   if (isLoading) {
     return (
@@ -126,8 +139,8 @@ export default function AdminRevenueDashboard() {
         <CardContent>
           <div className="space-y-4">
             {topAds.map((ad, index) => (
-              <div 
-                key={ad.id} 
+              <div
+                key={ad.id}
                 className="flex items-center justify-between p-4 border border-border rounded-lg"
               >
                 <div className="flex items-center space-x-4">
@@ -158,8 +171,8 @@ export default function AdminRevenueDashboard() {
                     <p className="text-muted-foreground">Inkomste</p>
                   </div>
                   <Badge
-                    variant={ad.ctr > 2 ? "default" : "secondary"}
-                    className={ad.ctr > 2 ? "bg-primary" : ""}
+                    variant={Number(ad.ctr) > 2 ? "default" : "secondary"}
+                    className={Number(ad.ctr) > 2 ? "bg-primary" : ""}
                   >
                     {ad.ctr}% CTR
                   </Badge>

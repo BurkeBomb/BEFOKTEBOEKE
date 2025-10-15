@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  ExternalLink,
-  Search,
-  ShoppingCart,
+import { 
+  ExternalLink, 
+  Search, 
+  ShoppingCart, 
   Star,
   TrendingUp,
   DollarSign,
@@ -15,17 +15,45 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { AffiliateRecommendation, AffiliateStats } from "@/types/api";
+
+interface BookRecommendation {
+  id: string;
+  title: string;
+  author: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  rating: number;
+  reviewCount: number;
+  availability: string;
+  store: string;
+  storeUrl: string;
+  affiliateUrl: string;
+  commission: number;
+  imageUrl?: string;
+  description?: string;
+}
+
+interface AffiliatePartnerStats {
+  totalCommission: number;
+  commissionGrowth: number;
+  totalClicks: number;
+  clickGrowth: number;
+  conversionRate: number;
+  conversionGrowth: number;
+  totalSales: number;
+  salesThisMonth: number;
+}
 
 export default function AffiliateMarketing() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  const { data: recommendations, isLoading } = useQuery<AffiliateRecommendation[]>({
+  const { data: recommendations, isLoading } = useQuery<BookRecommendation[]>({
     queryKey: ["/api/affiliate/recommendations"],
   });
 
-  const { data: partnerStats } = useQuery<AffiliateStats>({
+  const { data: partnerStats } = useQuery<AffiliatePartnerStats>({
     queryKey: ["/api/affiliate/stats"],
   });
 
@@ -57,18 +85,19 @@ export default function AffiliateMarketing() {
     }
   };
 
-  const handleAffiliateClick = (book: AffiliateRecommendation) => {
-    trackClickMutation.mutate({ 
-      bookId: book.id, 
-      affiliateUrl: book.affiliateUrl 
+  const handleAffiliateClick = (book: BookRecommendation) => {
+    trackClickMutation.mutate({
+      bookId: book.id,
+      affiliateUrl: book.affiliateUrl
     });
-    window.open(book.affiliateUrl, '_blank');
+    window.open(book.affiliateUrl, "_blank");
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('af-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
+  const formatCurrency = (amountInCents: number) => {
+    const amount = amountInCents / 100;
+    return new Intl.NumberFormat("af-ZA", {
+      style: "currency",
+      currency: "ZAR",
     }).format(amount);
   };
 

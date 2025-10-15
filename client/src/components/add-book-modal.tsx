@@ -38,8 +38,7 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
   const addBookMutation = useMutation({
     mutationFn: async (data: AddBookWithAI) => {
       setIsAIProcessing(true);
-      const response = await apiRequest("POST", "/api/books/add-with-ai", data);
-      return response.json();
+      return apiRequest("POST", "/api/books/add-with-ai", data);
     },
     onSuccess: (newBook) => {
       queryClient.invalidateQueries({ queryKey: ["/api/books"] });

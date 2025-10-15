@@ -1,38 +1,39 @@
 import NavigationBar from "@/components/navigation-bar";
 import AdminRevenueDashboard from "@/components/admin-revenue-dashboard";
 import AdvancedAnalytics from "@/components/advanced-analytics";
-import AffiliateMarketing from "@/components/affiliate-marketing";
-import AdvertisementComponent from "@/components/advertisement";
+import Advertisement from "@/components/advertisement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
-        <section className="space-y-2">
-          <h1 className="text-3xl font-black text-slate-900">Bestuursentrum</h1>
-          <p className="text-slate-600">
-            Monitor advertensie prestasie, gebruikersaktiwiteit en premium vennootskappe.
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">Administrateur Dashboard</h1>
+          <p className="text-muted-foreground max-w-3xl">
+            Monitor advertensie-inkomste, gebruikersgroei en inhoudsprestasie om BURKEBOOKS se besigheidsdoelwitte te dryf.
           </p>
-        </section>
+        </header>
 
         <AdminRevenueDashboard />
-
         <AdvancedAnalytics />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Advertisement position="sidebar" />
+          <Card>
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-slate-900">
-                Vennootskap prestasie
-              </CardTitle>
+              <CardTitle>Operasionele Wenke</CardTitle>
             </CardHeader>
-            <CardContent>
-              <AffiliateMarketing />
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Monitor gereeld prestasie van advertensies en optimaliseer kreatiewe op grond van klikdata om inkomste te verhoog.
+              </p>
+              <p>
+                Gebruik AI-aanbevelingsdata om nuwe bemarkingsveldtogte vir gewilde genres te beplan.
+              </p>
             </CardContent>
           </Card>
-          <AdvertisementComponent position="sidebar" />
         </div>
       </main>
     </div>

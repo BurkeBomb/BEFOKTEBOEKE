@@ -15,11 +15,19 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Bell, MapPin, User, Tag } from "lucide-react";
-import type { CheckedState } from "@radix-ui/react-checkbox";
 
 interface EventAlertModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface EventAlertRequest {
+  eventType: string | null;
+  city: string | null;
+  author: string | null;
+  keywords: string[] | null;
+  emailNotifications: boolean;
+  smsNotifications: boolean;
 }
 
 export default function EventAlertModal({ open, onOpenChange }: EventAlertModalProps) {
@@ -29,13 +37,13 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
   const [keywords, setKeywords] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const createAlertMutation = useMutation({
-    mutationFn: async (alertData: any) => {
-      return apiRequest("POST", "/api/event-alerts", alertData);
+  const createAlertMutation = useMutation<void, Error, EventAlertRequest>({
+    mutationFn: async (alertData) => {
+      await apiRequest("POST", "/api/event-alerts", alertData);
     },
     onSuccess: () => {
       toast({
@@ -66,13 +74,13 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const keywordArray = keywords
       .split(",")
       .map(k => k.trim())
       .filter(k => k.length > 0);
 
-    const alertData = {
+    const alertData: EventAlertRequest = {
       eventType: eventType || null,
       city: city || null,
       author: author || null,
@@ -196,7 +204,7 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
               <Checkbox
                 id="email"
                 checked={emailNotifications}
-                onCheckedChange={(checked: CheckedState) => setEmailNotifications(checked === true)}
+                onCheckedChange={(checked) => setEmailNotifications(checked === true)}
               />
               <Label htmlFor="email" className="text-sm">
                 E-pos kennisgewings
@@ -207,7 +215,7 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
               <Checkbox
                 id="sms"
                 checked={smsNotifications}
-                onCheckedChange={(checked: CheckedState) => setSmsNotifications(checked === true)}
+                onCheckedChange={(checked) => setSmsNotifications(checked === true)}
               />
               <Label htmlFor="sms" className="text-sm">
                 SMS kennisgewings

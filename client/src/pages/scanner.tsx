@@ -2,80 +2,63 @@ import { useState } from "react";
 import NavigationBar from "@/components/navigation-bar";
 import BarcodeScanner from "@/components/barcode-scanner";
 import CameraBookScanner from "@/components/camera-book-scanner";
+import Advertisement from "@/components/advertisement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { QrCode, Camera } from "lucide-react";
 
 export default function ScannerPage() {
-  const [barcodeOpen, setBarcodeOpen] = useState(false);
-  const [cameraOpen, setCameraOpen] = useState(false);
+  const [isBarcodeOpen, setBarcodeOpen] = useState(false);
+  const [isCameraOpen, setCameraOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <header className="space-y-2">
-          <h1 className="text-3xl font-black text-slate-900">Skandeerder laboratorium</h1>
-          <p className="text-slate-600">
-            Gebruik jou kamera om boeke te skandeer en outomaties by jou versameling te voeg.
+          <h1 className="text-3xl font-bold text-foreground">Skan Jou Boeke</h1>
+          <p className="text-muted-foreground max-w-3xl">
+            Gebruik jou kamera of strepieskode-leser om boeke vinnig by te voeg en AI te laat help met identifikasie en metadata.
           </p>
         </header>
 
-        <Alert className="bg-blue-50 border-blue-200 text-blue-700">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Wenk</AlertTitle>
-          <AlertDescription>
-            Maak seker jy gee kameratoegang toe wanneer jy die skandeerders gebruik vir die beste ervaring.
-          </AlertDescription>
-        </Alert>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <QrCode className="h-5 w-5 text-primary" /> ISBN Barcode Skan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
+              <p>Gebruik die agterkamera van jou toestel om ISBN-kodes te lees en outomaties boekdata te laai.</p>
+              <Button onClick={() => setBarcodeOpen(true)} className="flex items-center space-x-2">
+                <QrCode className="h-4 w-4" />
+                <span>Begin barcode skandering</span>
+              </Button>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-slate-900">Skandeer opsies</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs
-              defaultValue="barcode"
-              onValueChange={(value) => {
-                if (value === "barcode") {
-                  setCameraOpen(false);
-                } else {
-                  setBarcodeOpen(false);
-                }
-              }}
-            >
-              <TabsList>
-                <TabsTrigger value="barcode">Barcode skandeerder</TabsTrigger>
-                <TabsTrigger value="camera">Omslag analise</TabsTrigger>
-              </TabsList>
-              <TabsContent value="barcode" className="pt-6">
-                <div className="space-y-4">
-                  <p className="text-sm text-slate-600">
-                    Begin die barcode skandeerder om ISBN's vinnig vas te vang. Maak seker jou boek se strepieskode is duidelik sigbaar.
-                  </p>
-                  <Button onClick={() => setBarcodeOpen(true)} className="w-full sm:w-auto">
-                    Open barcode skandeerder
-                  </Button>
-                </div>
-                <BarcodeScanner open={barcodeOpen} onOpenChange={setBarcodeOpen} />
-              </TabsContent>
-              <TabsContent value="camera" className="pt-6">
-                <div className="space-y-4">
-                  <p className="text-sm text-slate-600">
-                    Gebruik die kamera skandeerder om boekomslag-inligting vas te vang en AI-analise te laat doen.
-                  </p>
-                  <Button onClick={() => setCameraOpen(true)} className="w-full sm:w-auto">
-                    Open kamera skandeerder
-                  </Button>
-                </div>
-                <CameraBookScanner open={cameraOpen} onOpenChange={setCameraOpen} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-primary" /> AI Omslagontleding
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
+              <p>Neem 'n foto van 'n boekomslag en laat AI skrywer, titel en beskrywing voorspel.</p>
+              <Button onClick={() => setCameraOpen(true)} className="flex items-center space-x-2">
+                <Camera className="h-4 w-4" />
+                <span>Open kamera skandeerder</span>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Advertisement position="inline" />
       </main>
+
+      <BarcodeScanner open={isBarcodeOpen} onOpenChange={setBarcodeOpen} />
+      <CameraBookScanner open={isCameraOpen} onOpenChange={setCameraOpen} />
     </div>
   );
 }

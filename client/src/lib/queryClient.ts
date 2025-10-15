@@ -1,227 +1,176 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, type QueryFunctionContext } from "@tanstack/react-query";
 
-const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string | undefined) ?? "";
+type Primitive = string | number | boolean | bigint;
 
-const KNOWN_HTTP_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
-
-export class ApiError extends Error {
-  status: number;
-  data: unknown;
-
-  constructor(message: string, status: number, data: unknown) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.data = data;
-  }
-}
-
-type ApiRequestInit = Omit<RequestInit, "body" | "method">;
-
-type NormalizedRequest = {
-  method: string;
-  path: string;
-  body: unknown;
-  init?: ApiRequestInit;
+type ApiRequestOptions = {
+  signal?: AbortSignal;
+  headers?: HeadersInit;
+  body?: unknown;
 };
 
-function normalizeRequest(
-  first: string,
-  second?: string | unknown,
-  third?: unknown,
-  fourth?: ApiRequestInit,
-): NormalizedRequest {
+function isOptions(value: unknown): value is ApiRequestOptions {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return "signal" in candidate || "headers" in candidate || "body" in candidate;
+}
+
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+    public readonly data: unknown
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function apiRequest(url: string, options?: ApiRequestOptions): Promise<any>;
+export function apiRequest(url: string, body: unknown, options?: ApiRequestOptions): Promise<any>;
+export function apiRequest(method: string, url: string, body?: unknown, options?: ApiRequestOptions): Promise<any>;
+export function apiRequest(url: string, method: string, body?: unknown, options?: ApiRequestOptions): Promise<any>;
+export async function apiRequest(...args: unknown[]): Promise<any> {
+  if (!args.length) {
+    throw new Error("apiRequest requires at least one argument");
+  }
+
+  if (typeof args[0] !== "string") {
+    throw new Error("First argument to apiRequest must be a string");
+  }
+
   let method: string;
-  let path: string;
+  let url: string;
   let body: unknown;
-  let init: ApiRequestInit | undefined;
+  let options: ApiRequestOptions | undefined;
 
-  if (first.startsWith("/")) {
-    path = first;
+  const first = args[0];
+  const second = args[1];
+  const third = args[2];
+  const fourth = args[3];
 
-    if (typeof second === "string" && !second.startsWith("/")) {
-      method = second;
-      body = third;
-      init = fourth;
-    } else {
-      method = "GET";
-      body = second;
-      init = third as ApiRequestInit | undefined;
-    }
-  } else {
-    method = first;
-    if (typeof second !== "string") {
-      throw new Error("Path must be provided when calling apiRequest with method first");
-    }
-    path = second;
+  if (
+    typeof second === "string" &&
+    (second.startsWith("/") || second.startsWith("http")) &&
+    args.length >= 2
+  ) {
+    method = first.toUpperCase();
+    url = second;
     body = third;
-    init = fourth;
-  }
-
-  method = method.toUpperCase();
-  if (!KNOWN_HTTP_METHODS.has(method)) {
-    throw new Error(`Unsupported HTTP method: ${method}`);
-  }
-
-  return { method, path, body, init };
-}
-
-function buildUrl(path: string): string {
-  if (/^https?:\/\//i.test(path)) {
-    return path;
-  }
-
-  if (!path.startsWith("/")) {
-    path = `/${path}`;
-  }
-
-  return `${API_BASE_URL}${path}`;
-}
-
-function prepareBody(body: unknown): BodyInit | undefined {
-  if (body === undefined || body === null) {
-    return undefined;
-  }
-
-  if (body instanceof FormData || body instanceof Blob || body instanceof ArrayBuffer || body instanceof URLSearchParams) {
-    return body as BodyInit;
-  }
-
-  if (typeof body === "string") {
-    return body;
-  }
-
-  return JSON.stringify(body);
-}
-
-async function handleError(response: Response): Promise<never> {
-  const contentType = response.headers.get("content-type");
-  let data: unknown;
-
-  if (contentType && contentType.includes("application/json")) {
-    try {
-      data = await response.json();
-    } catch (error) {
-      data = await response.text();
-    }
+    options = fourth as ApiRequestOptions | undefined;
+  } else if (typeof second === "string") {
+    url = first;
+    method = second.toUpperCase();
+    body = third;
+    options = fourth as ApiRequestOptions | undefined;
   } else {
-    data = await response.text();
-  }
-
-  let extractedMessage: string | undefined;
-
-  if (typeof data === "object" && data !== null && "message" in data) {
-    const messageValue = (data as Record<string, unknown>).message;
-    if (typeof messageValue === "string" && messageValue.trim().length > 0) {
-      extractedMessage = messageValue;
+    url = first;
+    method = "GET";
+    if (isOptions(second)) {
+      options = second;
+      body = third;
+    } else {
+      body = second;
+      options = third as ApiRequestOptions | undefined;
     }
-  } else if (typeof data === "string" && data.trim().length > 0) {
-    extractedMessage = data;
   }
 
-  const statusText = response.statusText?.trim();
-  const errorMessage: string =
-    extractedMessage ?? (statusText && statusText.length > 0 ? statusText : "Request failed");
-
-  throw new ApiError(errorMessage, response.status, data);
-}
-
-export async function apiRequest(
-  first: string,
-  second?: string | unknown,
-  third?: unknown,
-  fourth?: ApiRequestInit,
-): Promise<Response> {
-  const { method, path, body, init } = normalizeRequest(first, second, third, fourth);
-  const url = buildUrl(path);
-  const preparedBody = prepareBody(body);
-
-  const headers = new Headers(init?.headers);
-  if (!headers.has("Accept")) {
-    headers.set("Accept", "application/json");
+  if (options && options.body !== undefined && body === undefined) {
+    body = options.body;
   }
 
-  if (preparedBody !== undefined && !(preparedBody instanceof FormData)) {
-    if (!headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  let fetchBody: BodyInit | undefined;
+
+  if (body instanceof FormData) {
+    fetchBody = body;
+  } else if (body !== undefined && body !== null) {
+    headers["Content-Type"] = "application/json";
+    fetchBody = JSON.stringify(body);
+  }
+
+  if (options?.headers) {
+    for (const [key, value] of Object.entries(options.headers)) {
+      headers[key] = value as string;
     }
   }
 
   const response = await fetch(url, {
-    ...init,
     method,
-    credentials: init?.credentials ?? "include",
-    headers,
-    body: preparedBody,
+    headers: method === "GET" ? { Accept: headers.Accept, ...(options?.headers || {}) } : headers,
+    body: method === "GET" ? undefined : fetchBody,
+    credentials: "include",
+    signal: options?.signal,
   });
 
-  if (!response.ok) {
-    await handleError(response);
-  }
+  const contentType = response.headers.get("content-type") ?? "";
+  const hasBody = response.status !== 204 && response.status !== 205;
+  let data: unknown = null;
 
-  return response;
-}
-
-function buildPathFromQueryKey(queryKey: readonly unknown[]): string {
-  if (queryKey.length === 0) {
-    throw new Error("Query key must not be empty");
-  }
-
-  const [base, extra] = queryKey;
-  if (typeof base !== "string") {
-    throw new Error("First query key entry must be a string path");
-  }
-
-  let path = base;
-
-  if (typeof extra === "string" || typeof extra === "number") {
-    path = `${base.replace(/\/$/, "")}/${extra}`;
-  } else if (extra && typeof extra === "object") {
-    const searchParams = new URLSearchParams();
-    Object.entries(extra as Record<string, unknown>).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
-        return;
-      }
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (item !== undefined && item !== null) {
-            searchParams.append(key, String(item));
-          }
-        });
-      } else {
-        searchParams.append(key, String(value));
-      }
-    });
-
-    const queryString = searchParams.toString();
-    if (queryString) {
-      const separator = path.includes("?") ? "&" : "?";
-      path = `${path}${separator}${queryString}`;
+  if (hasBody) {
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      data = await response.text();
     }
   }
 
-  return path;
+  if (!response.ok) {
+    const message =
+      typeof data === "object" && data !== null && "message" in data
+        ? String((data as Record<string, Primitive>).message)
+        : response.statusText || "Request failed";
+    throw new ApiError(response.status, message, data);
+  }
+
+  return data;
 }
+
+const defaultQueryFn = async ({ queryKey, signal }: QueryFunctionContext): Promise<any> => {
+  const [resource, params] = queryKey as [string, unknown];
+
+  if (typeof resource !== "string") {
+    throw new Error("First query key entry must be a string endpoint");
+  }
+
+  let url = resource;
+
+  if (params && typeof params === "object" && !Array.isArray(params)) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
+      if (value === undefined || value === null) continue;
+      searchParams.set(key, String(value));
+    }
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += (url.includes("?") ? "&" : "?") + queryString;
+    }
+  }
+
+  return apiRequest(url, { signal });
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: async ({ queryKey }) => {
-        const path = buildPathFromQueryKey(queryKey);
-        const response = await apiRequest("GET", path);
-        const contentType = response.headers.get("content-type");
-
-        if (contentType && contentType.includes("application/json")) {
-          return await response.json();
-        }
-
-        return await response.text();
-      },
-      retry: 1,
-      staleTime: 1000 * 30,
+      queryFn: defaultQueryFn,
+      staleTime: 60 * 1000,
       refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+      retry: (failureCount, error) => {
+        if (error instanceof ApiError && error.status === 401) {
+          return false;
+        }
+        return failureCount < 3;
+      },
     },
     mutations: {
       retry: 0,

@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import {
-  Users,
-  MessageSquare,
-  Heart,
-  Star,
+import { 
+  Users, 
+  MessageSquare, 
+  Heart, 
+  Star, 
   Trophy,
   Target,
   BookOpen,
@@ -19,32 +19,73 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type {
-  BadgeSummary,
-  BookClubSummary,
-  ChallengeSummary,
-  LeaderboardEntry,
-  ReviewSummary,
-} from "@/types/api";
+
+interface Review {
+  id: string;
+  bookTitle: string;
+  userName: string;
+  rating: number;
+  review: string;
+  likes: number;
+  createdAt: string;
+}
+
+interface BookClub {
+  id: string;
+  name: string;
+  description?: string | null;
+  memberCount: number;
+  currentBook?: string | null;
+}
+
+interface Challenge {
+  id: string;
+  name: string;
+  description: string;
+  targetCount: number;
+  currentCount: number;
+  isJoined: boolean;
+}
+
+interface BadgeData {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  earnedAt: string;
+}
+
+interface LeaderboardEntry {
+  id: string;
+  name: string;
+  booksRead: number;
+  points: number;
+}
+
+interface NewReview {
+  bookId: string;
+  rating: number;
+  review: string;
+}
 
 export default function SocialFeatures() {
   const [activeTab, setActiveTab] = useState("reviews");
-  const [newReview, setNewReview] = useState({ bookId: "", rating: 5, review: "" });
+  const [newReview, setNewReview] = useState<NewReview>({ bookId: "", rating: 5, review: "" });
   const { toast } = useToast();
 
-  const { data: reviews } = useQuery<ReviewSummary[]>({
+  const { data: reviews } = useQuery<Review[]>({
     queryKey: ["/api/social/reviews"],
   });
 
-  const { data: bookClubs } = useQuery<BookClubSummary[]>({
+  const { data: bookClubs } = useQuery<BookClub[]>({
     queryKey: ["/api/social/book-clubs"],
   });
 
-  const { data: challenges } = useQuery<ChallengeSummary[]>({
+  const { data: challenges } = useQuery<Challenge[]>({
     queryKey: ["/api/social/challenges"],
   });
 
-  const { data: badges } = useQuery<BadgeSummary[]>({
+  const { data: badges } = useQuery<BadgeData[]>({
     queryKey: ["/api/social/badges"],
   });
 
@@ -52,9 +93,9 @@ export default function SocialFeatures() {
     queryKey: ["/api/social/leaderboard"],
   });
 
-  const addReviewMutation = useMutation({
-    mutationFn: async (reviewData: any) => {
-      return await apiRequest("/api/social/reviews", "POST", reviewData);
+  const addReviewMutation = useMutation<void, Error, NewReview>({
+    mutationFn: async (reviewData) => {
+      await apiRequest("/api/social/reviews", "POST", reviewData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/social/reviews"] });
@@ -66,9 +107,9 @@ export default function SocialFeatures() {
     },
   });
 
-  const joinChallengeMutation = useMutation({
-    mutationFn: async (challengeId: string) => {
-      return await apiRequest(`/api/social/challenges/${challengeId}/join`, "POST");
+  const joinChallengeMutation = useMutation<void, Error, string>({
+    mutationFn: async (challengeId) => {
+      await apiRequest(`/api/social/challenges/${challengeId}/join`, "POST");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/social/challenges"] });
@@ -79,9 +120,9 @@ export default function SocialFeatures() {
     },
   });
 
-  const createBookClubMutation = useMutation({
-    mutationFn: async (clubData: any) => {
-      return await apiRequest("/api/social/book-clubs", "POST", clubData);
+  const createBookClubMutation = useMutation<void, Error, Record<string, unknown>>({
+    mutationFn: async (clubData) => {
+      await apiRequest("/api/social/book-clubs", "POST", clubData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/social/book-clubs"] });
@@ -240,7 +281,7 @@ export default function SocialFeatures() {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {bookClubs?.map((club) => (
+            {bookClubs?.map((club) => (
               <Card key={club.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
@@ -270,7 +311,7 @@ export default function SocialFeatures() {
       {activeTab === "challenges" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {challenges?.map((challenge) => (
+            {challenges?.map((challenge) => (
               <Card key={challenge.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -318,7 +359,7 @@ export default function SocialFeatures() {
       {activeTab === "badges" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {badges?.map((badge) => (
+            {badges?.map((badge) => (
               <Card key={badge.id} className="text-center">
                 <CardContent className="p-4">
                   <div className="flex justify-center mb-2">

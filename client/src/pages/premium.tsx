@@ -1,36 +1,21 @@
 import NavigationBar from "@/components/navigation-bar";
 import PremiumSubscription from "@/components/premium-subscription";
-import AffiliateMarketing from "@/components/affiliate-marketing";
-import AdvertisementComponent from "@/components/advertisement";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Advertisement from "@/components/advertisement";
 
 export default function PremiumPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-        <section className="space-y-2 text-center">
-          <h1 className="text-3xl font-black text-slate-900">Premium lidmaatskap</h1>
-          <p className="text-slate-600">
-            Ontsluit AI-gedrewe insigte, advertensievrye lees en gevorderde versamelaar tools.
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <header className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold text-foreground">Opgradeer na Premium</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Ontsluit advertensievrye blaai, AI-aanbevelings, uitvoeropsies en eksklusiewe gemeenskapsfunksies.
           </p>
-        </section>
+        </header>
 
         <PremiumSubscription />
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-slate-900">
-                Eksklusiewe vennootskappe
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AffiliateMarketing />
-            </CardContent>
-          </Card>
-          <AdvertisementComponent position="sidebar" />
-        </div>
+        <Advertisement position="footer" />
       </main>
     </div>
   );

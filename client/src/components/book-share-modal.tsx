@@ -1,8 +1,7 @@
 import { useState, useRef, useCallback } from "react";
+import type { Book as DbBook } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,22 +23,18 @@ import {
   Download,
   Copy,
   Palette,
-  Type,
   Image as ImageIcon,
   Twitter,
   Facebook,
-  Instagram,
   Linkedin,
   MessageCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import logoImage from "@assets/IMG_0287_1753515119482.png";
-import type { Book as BookRecord } from "@shared/schema";
 
 interface BookShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  book: BookRecord;
+  book: DbBook;
 }
 
 interface QuoteGraphicOptions {
@@ -108,26 +103,22 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
 
   const generateQuoteGraphic = useCallback(async () => {
     if (!canvasRef.current) return;
-    
+
     setIsGenerating(true);
-    
+
     try {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      const context = ctx;
+      const context = canvas.getContext('2d');
+      if (!context) return;
 
-      // Set canvas size for social media (1080x1080 for Instagram)
       canvas.width = 1080;
       canvas.height = 1080;
 
       const colors = colorSchemes[shareOptions.colorScheme];
-      
-      // Clear canvas and set background
+
       context.fillStyle = colors.background;
       context.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Add gradient background based on template
       if (shareOptions.template === 'modern') {
         const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, colors.background);
@@ -136,7 +127,6 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
         context.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      // Add decorative elements based on template
       if (shareOptions.template === 'elegant') {
         context.strokeStyle = colors.primary;
         context.lineWidth = 8;
@@ -150,6 +140,7 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
       const drawBookCoverPlaceholder = () => {
         context.fillStyle = colors.primary;
         context.fillRect(coverX, coverY, coverSize, coverSize * 1.4);
+
         context.fillStyle = colors.background;
         context.font = 'bold 80px Arial';
         context.textAlign = 'center';
@@ -185,9 +176,8 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
         context.fillStyle = colors.primary;
         context.fillText(`deur ${book.author}`, canvas.width / 2, y + 60);
 
-        const quoteText = shareOptions.customQuote ||
-          (shareOptions.includeReview && book.personalReview ? book.personalReview :
-            `"'n Wonderlike toevoeging tot my Afrikaanse boekversameling!"`);
+        const reviewText = shareOptions.includeReview && book.personalReview ? book.personalReview : null;
+        const quoteText = shareOptions.customQuote || reviewText || `"'n Wonderlike toevoeging tot my Afrikaanse boekversameling!"`;
 
         if (quoteText) {
           context.font = `italic ${shareOptions.fontSize === 'large' ? '32' : shareOptions.fontSize === 'medium' ? '28' : '24'}px Arial`;
@@ -213,21 +203,21 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
           context.fillText(quoteLine, canvas.width / 2, quoteY);
         }
 
-        if (shareOptions.includeRating && book.personalRating) {
+        if (shareOptions.includeRating && (book.personalRating ?? 0) > 0) {
           const starSize = 32;
           const starsY = canvas.height - 200;
           const starsStartX = (canvas.width - (5 * starSize * 1.2)) / 2;
 
           context.font = `${starSize}px Arial`;
           for (let i = 0; i < 5; i++) {
-            context.fillStyle = i < book.personalRating ? colors.primary : colors.secondary;
+            context.fillStyle = i < (book.personalRating ?? 0) ? colors.primary : colors.secondary;
             context.fillText('★', starsStartX + (i * starSize * 1.2), starsY);
           }
         }
 
         const logoSize = 40;
-        let logoX = 40;
-        let logoY = canvas.height - 80;
+        let logoX: number;
+        let logoY: number;
 
         switch (shareOptions.logoPosition) {
           case 'top-left':
@@ -247,6 +237,7 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
             logoY = canvas.height - 80;
             break;
           case 'center':
+          default:
             logoX = (canvas.width - logoSize) / 2;
             logoY = canvas.height - 60;
             break;
@@ -260,14 +251,12 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
         context.fillStyle = colors.text;
         context.font = 'bold 16px Arial';
         context.textAlign = shareOptions.logoPosition === 'center' ? 'center' : 'left';
+
         if (shareOptions.logoPosition === 'center') {
           context.fillText('BURKEBOOKS', logoX + logoSize / 2, logoY + 20);
         } else {
           context.fillText('BURKEBOOKS', logoX + logoSize + 10, logoY - logoSize / 2 + 6);
         }
-
-        const imageData = canvas.toDataURL('image/png');
-        setGeneratedImage(imageData);
       };
 
       if (book.coverImage) {
@@ -291,7 +280,7 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
       toast({
         title: "Kon nie grafika skep nie",
         description: "Probeer asseblief weer",
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsGenerating(false);
@@ -330,7 +319,7 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
     }
   };
 
-  const shareToSocialMedia = (platform: string) => {
+  const shareToSocialMedia = (platform: 'twitter' | 'facebook' | 'linkedin' | 'whatsapp') => {
     const shareText = `Ek lees tans "${book.title}" deur ${book.author}. ${shareOptions.customQuote || "'n Fantastiese boek!"} #BURKEBOOKS #AfrikaansLiteratuur #Boeke`;
     const shareUrl = window.location.origin;
     
@@ -384,7 +373,9 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
                   <Label>Sjabloon</Label>
                   <Select
                     value={shareOptions.template}
-                    onValueChange={(value: any) => setShareOptions(prev => ({ ...prev, template: value }))}
+                    onValueChange={(value: QuoteGraphicOptions["template"]) =>
+                      setShareOptions((prev) => ({ ...prev, template: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -404,7 +395,9 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
                   <Label>Kleurskema</Label>
                   <Select
                     value={shareOptions.colorScheme}
-                    onValueChange={(value: any) => setShareOptions(prev => ({ ...prev, colorScheme: value }))}
+                    onValueChange={(value: QuoteGraphicOptions["colorScheme"]) =>
+                      setShareOptions((prev) => ({ ...prev, colorScheme: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -424,7 +417,9 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
                   <Label>Teks Grootte</Label>
                   <Select
                     value={shareOptions.fontSize}
-                    onValueChange={(value: any) => setShareOptions(prev => ({ ...prev, fontSize: value }))}
+                    onValueChange={(value: QuoteGraphicOptions["fontSize"]) =>
+                      setShareOptions((prev) => ({ ...prev, fontSize: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -442,7 +437,9 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
                   <Label>Logo Posisie</Label>
                   <Select
                     value={shareOptions.logoPosition}
-                    onValueChange={(value: any) => setShareOptions(prev => ({ ...prev, logoPosition: value }))}
+                    onValueChange={(value: QuoteGraphicOptions["logoPosition"]) =>
+                      setShareOptions((prev) => ({ ...prev, logoPosition: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />

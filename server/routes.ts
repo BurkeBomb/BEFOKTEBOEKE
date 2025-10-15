@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -16,18 +16,6 @@ import OpenAI from "openai";
 import { priceScraper } from "./price-scraper";
 import { eventService } from "./event-service";
 import { gamificationService } from "./gamification-service";
-
-type RequestWithUser = Request & {
-  user?: Express.User & {
-    claims?: { sub?: string };
-    refresh_token?: string;
-    expires_at?: number;
-  };
-};
-
-function getUserId(req: Request): string | undefined {
-  return (req as RequestWithUser).user?.claims?.sub;
-}
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || "default_key" 
@@ -577,15 +565,12 @@ Year: ${validatedData.year || "Unknown"}`,
   });
 
   // Premium Subscription Routes
-    app.get("/api/subscription/status", isAuthenticated, async (req, res) => {
-      try {
-        const userId = getUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-        const user = await storage.getUser(userId);
-        res.json({
-          tier: user?.subscriptionTier || "free",
+  app.get("/api/subscription/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      res.json({
+        tier: user?.subscriptionTier || "free",
         endDate: user?.subscriptionEndDate,
         referralCode: user?.referralCode || "BURKEBOOKS123",
         totalReferrals: user?.totalReferrals || 0
@@ -889,21 +874,19 @@ Year: ${validatedData.year || "Unknown"}`,
     }
   });
 
-    app.post("/api/events/:id/register", isAuthenticated, async (req: any, res) => {
-      try {
-        const userId = req.user.claims.sub;
-        const { id } = req.params;
-
-        const registration = await storage.registerForEvent(id, userId);
-        res.json(registration);
-      } catch (error) {
-        console.error("Error registering for event:", error);
-        const message = error instanceof Error && error.message
-          ? error.message
-          : "Failed to register for event";
-        res.status(500).json({ message });
-      }
-    });
+  app.post("/api/events/:id/register", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      
+      const registration = await storage.registerForEvent(id, userId);
+      res.json(registration);
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      const message = error instanceof Error && error.message ? error.message : "Failed to register for event";
+      res.status(500).json({ message });
+    }
+  });
 
   app.delete("/api/events/:id/register", isAuthenticated, async (req: any, res) => {
     try {

@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  Download,
-  FileText,
-  FileSpreadsheet,
+  Download, 
+  FileText, 
+  FileSpreadsheet, 
   Image,
   Cloud,
   Share2,
@@ -17,10 +17,36 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { ExportHistoryItem } from "@/types/api";
+
+interface ExportOptions {
+  format: string;
+  includeImages: boolean;
+  includeReviews: boolean;
+  filterBy: string;
+  sortBy: string;
+}
+
+interface ExportHistoryItem {
+  id: string;
+  name?: string | null;
+  type: string;
+  status: "completed" | "processing" | "pending" | string;
+  size?: string | null;
+  createdAt: string;
+}
+
+interface ShareCollectionResponse {
+  shareUrl: string;
+}
+
+interface ExportMutationResponse {
+  message: string;
+  exportId: string;
+  estimatedTime: string;
+}
 
 export default function EnhancedExport() {
-  const [exportOptions, setExportOptions] = useState({
+  const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: "csv",
     includeImages: false,
     includeReviews: false,
@@ -33,11 +59,11 @@ export default function EnhancedExport() {
     queryKey: ["/api/exports/history"],
   });
 
-  const exportMutation = useMutation({
-    mutationFn: async (options: any) => {
+  const exportMutation = useMutation<ExportMutationResponse, Error, ExportOptions>({
+    mutationFn: async (options) => {
       return await apiRequest("/api/exports/create", "POST", options);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Uitvoer Begin",
         description: "Jou uitvoer word verwerk. Jou sal 'n koppeling kry wanneer dit gereed is.",
@@ -59,13 +85,12 @@ export default function EnhancedExport() {
     },
   });
 
-  const shareCollectionMutation = useMutation<{ shareUrl: string }>({
+  const shareCollectionMutation = useMutation<ShareCollectionResponse>({
     mutationFn: async () => {
-      const response = await apiRequest("/api/collections/share", "POST");
-      return await response.json() as { shareUrl: string };
+      return await apiRequest("/api/collections/share", "POST");
     },
     onSuccess: (data) => {
-      void navigator.clipboard.writeText(data.shareUrl);
+      navigator.clipboard.writeText(data.shareUrl);
       toast({
         title: "Deelkoppeling Geskep",
         description: "Deelkoppeling is na jou klipbord gekopieer!",
@@ -260,27 +285,27 @@ export default function EnhancedExport() {
               <div key={exportItem.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    {exportItem.type === 'pdf' && <FileText className="h-5 w-5 text-primary" />}
-                    {exportItem.type === 'csv' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
-                    {exportItem.type === 'excel' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
+                    {exportItem.type === "pdf" && <FileText className="h-5 w-5 text-primary" />}
+                    {exportItem.type === "csv" && <FileSpreadsheet className="h-5 w-5 text-primary" />}
+                    {exportItem.type === "excel" && <FileSpreadsheet className="h-5 w-5 text-primary" />}
                   </div>
                   <div>
                     <h4 className="font-medium text-foreground">
                       {exportItem.name || `${exportItem.type.toUpperCase()} Uitvoer`}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(exportItem.createdAt).toLocaleDateString('af-ZA')} • {exportItem.size}
+                      {new Date(exportItem.createdAt).toLocaleDateString("af-ZA")} • {exportItem.size}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Badge
-                    variant={exportItem.status === 'completed' ? 'default' : 'secondary'}
+                    variant={exportItem.status === "completed" ? "default" : "secondary"}
                   >
-                    {exportItem.status === 'completed' ? 'Gereed' : 'Verwerk'}
+                    {exportItem.status === "completed" ? "Gereed" : "Verwerk"}
                   </Badge>
-                  {exportItem.status === 'completed' && (
+                  {exportItem.status === "completed" && (
                     <Button size="sm" variant="outline">
                       <Download className="h-4 w-4 mr-1" />
                       Laai Af

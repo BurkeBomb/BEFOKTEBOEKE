@@ -1,174 +1,174 @@
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import NavigationBar from "@/components/navigation-bar";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Advertisement from "@/components/advertisement";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, RefreshCcw, ShoppingCart, Sparkles } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import type { PriceComparisonSummary } from "@/types/api";
+import { Loader2, RefreshCcw } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("af-ZA", {
-    style: "currency",
-    currency: "ZAR",
-    minimumFractionDigits: 2,
-  }).format(amount);
+interface StorePrice {
+  id: string;
+  store: string;
+  price: number;
+  shipping?: number;
+  totalPrice: number;
+  availability?: string;
+  url?: string;
+  estimatedDelivery?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
-export default function PriceComparison() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+interface PriceComparison {
+  id: string;
+  bookTitle: string;
+  author: string;
+  bestPrice: number;
+  averagePrice: number;
+  savings: number;
+  stores: StorePrice[];
+  lastUpdated: string;
+}
 
-  const comparisonsQuery = useQuery<PriceComparisonSummary[]>({
+export default function PriceComparisonPage() {
+  const [isComparing, setIsComparing] = useState(false);
+
+  const { data: comparisons = [], isPending } = useQuery<PriceComparison[]>({
     queryKey: ["/api/price-comparison"],
   });
 
-  const compareMutation = useMutation({
+  const compareWishlistMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/price-comparison/compare-wishlist");
+      setIsComparing(true);
+      return apiRequest("/api/price-comparison/compare-wishlist", "POST");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/price-comparison"] });
-      toast({
-        title: "Vergelykings opgedateer",
-        description: "Ons het jou wenslys pryse herbereken.",
-      });
     },
-    onError: () => {
-      toast({
-        title: "Kon nie vergelyk nie",
-        description: "Maak seker jou wenslys het boeke en probeer weer.",
-        variant: "destructive",
-      });
-    },
+    onSettled: () => setIsComparing(false),
   });
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("af-ZA", { style: "currency", currency: "ZAR" }).format(value);
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900">Prysvergelykings</h1>
-            <p className="text-slate-600">
-              Monitor beste pryse vir jou wenslys en vind die beste winkelkeuses in Suid-Afrika.
+            <h1 className="text-3xl font-bold text-foreground">Prysvergelyking</h1>
+            <p className="text-muted-foreground max-w-3xl">
+              Vergelyk aanlyn winkels vir boeke op jou wenslys en vind die beste beskikbare pryse in Suid-Afrika.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/price-comparison"] })}
-              disabled={comparisonsQuery.isFetching}
-            >
-              <RefreshCcw className={`h-4 w-4 mr-2 ${comparisonsQuery.isFetching ? "animate-spin" : ""}`} />
-              Herlaai data
-            </Button>
-            <Button
-              onClick={() => compareMutation.mutate()}
-              disabled={compareMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {compareMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
-              )}
-              Vergelyk wenslys
-            </Button>
-          </div>
+          <Button
+            className="flex items-center space-x-2"
+            onClick={() => compareWishlistMutation.mutate()}
+            disabled={isComparing}
+          >
+            {isComparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+            <span>{isComparing ? "Vergelyk tans..." : "Vergelyk Wenslys"}</span>
+          </Button>
         </header>
 
-        {comparisonsQuery.isLoading && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Card key={index} className="h-64 animate-pulse bg-slate-200/70" />
+        {isPending ? (
+          <Card className="animate-pulse">
+            <CardContent className="p-8 space-y-4">
+              <div className="h-6 bg-muted rounded w-1/3" />
+              <div className="h-4 bg-muted rounded w-2/3" />
+              <div className="h-32 bg-muted rounded" />
+            </CardContent>
+          </Card>
+        ) : comparisons.length === 0 ? (
+          <Card>
+            <CardContent className="py-16 text-center space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">Geen vergelykings beskikbaar nie</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Begin deur jou wenslys te vergelyk. Ons haal pryse by verskeie Suid-Afrikaanse boekwinkels en aanlyn platforms.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {comparisons.map((comparison) => (
+              <Card key={comparison.id}>
+                <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-xl text-foreground">
+                      {comparison.bookTitle}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">deur {comparison.author}</p>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Beste prys</p>
+                      <p className="font-semibold text-foreground">{formatCurrency(comparison.bestPrice)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Gemiddeld</p>
+                      <p className="font-semibold text-foreground">{formatCurrency(comparison.averagePrice)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Besparing</p>
+                      <p className="font-semibold text-green-600">{formatCurrency(comparison.savings)}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Winkel</TableHead>
+                        <TableHead>Prys</TableHead>
+                        <TableHead>Aflewering</TableHead>
+                        <TableHead>Totaal</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {comparison.stores.map((store) => (
+                        <TableRow key={store.id}>
+                          <TableCell className="font-medium">
+                            {store.url ? (
+                              <a
+                                href={store.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-primary hover:underline"
+                              >
+                                {store.store}
+                              </a>
+                            ) : (
+                              store.store
+                            )}
+                          </TableCell>
+                          <TableCell>{formatCurrency(store.price)}</TableCell>
+                          <TableCell>
+                            {store.shipping ? formatCurrency(store.shipping) : "Ingesluit"}
+                          </TableCell>
+                          <TableCell className="font-semibold text-foreground">
+                            {formatCurrency(store.totalPrice)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {store.availability ?? "Onbekend"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <p className="text-xs text-muted-foreground">
+                    Laas opgedateer {new Date(comparison.lastUpdated).toLocaleString()}.
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
 
-        {comparisonsQuery.isError && (
-          <Card>
-            <CardContent className="py-12 text-center space-y-4">
-              <p className="text-slate-600">Kon nie pryse laai nie.</p>
-              <Button onClick={() => comparisonsQuery.refetch()} variant="outline">
-                Probeer weer
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {comparisonsQuery.data?.length === 0 && !comparisonsQuery.isLoading && (
-          <Card>
-            <CardContent className="py-12 text-center space-y-4">
-              <ShoppingCart className="h-10 w-10 text-slate-400 mx-auto" />
-              <p className="text-slate-600">Geen pryse beskikbaar nie. Vergelyk jou wenslys om te begin.</p>
-              <Button onClick={() => compareMutation.mutate()} disabled={compareMutation.isPending}>
-                Vergelyk nou
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {comparisonsQuery.data?.map((comparison) => (
-          <Card key={comparison.id}>
-            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-              <div>
-                <CardTitle className="text-2xl font-semibold text-slate-900">
-                  {comparison.bookTitle}
-                </CardTitle>
-                <p className="text-sm text-slate-500">deur {comparison.author}</p>
-              </div>
-              <div className="flex flex-wrap gap-3 items-center">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  Beste prys: {formatCurrency(comparison.bestPrice)}
-                </Badge>
-                <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200">
-                  Gemiddeld: {formatCurrency(comparison.averagePrice)}
-                </Badge>
-                {comparison.savings > 0 && (
-                  <Badge className="bg-purple-100 text-purple-700">
-                    Spaar {formatCurrency(comparison.savings)}
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Winkel</TableHead>
-                    <TableHead>Beskikbaarheid</TableHead>
-                    <TableHead className="text-right">Prys</TableHead>
-                    <TableHead className="text-right">Versending</TableHead>
-                    <TableHead className="text-right">Totaal</TableHead>
-                    <TableHead className="text-right">Gradering</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {comparison.stores?.map((store) => (
-                    <TableRow key={store.id}>
-                      <TableCell>
-                        <div className="font-medium text-slate-900">{store.store}</div>
-                        {store.estimatedDelivery && (
-                          <p className="text-xs text-slate-500">Aflewering: {store.estimatedDelivery}</p>
-                        )}
-                      </TableCell>
-                      <TableCell>{store.availability || "Onbekend"}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(store.price)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(store.shipping || 0)}</TableCell>
-                      <TableCell className="text-right font-semibold">{formatCurrency(store.totalPrice)}</TableCell>
-                      <TableCell className="text-right text-sm text-slate-500">
-                        {store.rating ? `${store.rating}/5` : "-"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        ))}
+        <Advertisement position="footer" />
       </main>
     </div>
   );

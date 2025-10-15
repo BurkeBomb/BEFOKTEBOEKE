@@ -1,289 +1,194 @@
-import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import NavigationBar from "@/components/navigation-bar";
 import EventAlertModal from "@/components/event-alert-modal";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import Advertisement from "@/components/advertisement";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { CalendarDays, MapPin, Users, Bell, Loader2, Check, XCircle } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, MapPin, Users, Bell } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Event } from "@shared/schema";
-import type { UserEventRegistration } from "@/types/api";
 
-const eventTypeLabels: Record<string, string> = {
-  book_reading: "Boeklesing",
-  poetry_night: "Poësie aand",
-  author_talk: "Outeur gesprek",
-  book_club: "Boekklub",
-  workshop: "Werkswinkel",
-};
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("af-ZA", { style: "currency", currency: "ZAR" }).format(amount);
-}
-
-function formatDateRange(start: string | Date, end?: string | Date | null) {
-  const startDate = new Date(start);
-  const formatter = new Intl.DateTimeFormat("af-ZA", {
-    weekday: "short",
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const startLabel = formatter.format(startDate);
-  if (!end) return startLabel;
-  const endDate = new Date(end);
-  return `${startLabel} — ${formatter.format(endDate)}`;
+interface EventItem {
+  id: string;
+  title: string;
+  description?: string;
+  eventType: string;
+  venue: string;
+  city: string;
+  startDate: string;
+  endDate?: string;
+  price: number;
+  maxAttendees?: number;
+  currentAttendees: number;
+  featuredAuthor?: string;
+  featuredBook?: string;
+  tags?: string[] | null;
 }
 
 export default function EventsPage() {
-  const [alertsOpen, setAlertsOpen] = useState(false);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [isAlertOpen, setAlertOpen] = useState(false);
 
-  const eventsQuery = useQuery<Event[]>({
+  const { data: events = [], isPending } = useQuery<EventItem[]>({
     queryKey: ["/api/events"],
   });
 
-  const myEventsQuery = useQuery<UserEventRegistration[]>({
+  const { data: myEvents = [] } = useQuery<EventItem[]>({
     queryKey: ["/api/events/my-events"],
   });
 
-  const registeredMap = useMemo(() => {
-    const map = new Map<string, UserEventRegistration>();
-    myEventsQuery.data?.forEach((event) => {
-      map.set(event.id, event);
-    });
-    return map;
-  }, [myEventsQuery.data]);
-
   const registerMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      await apiRequest(`/api/events/${eventId}/register`, "POST");
-    },
+    mutationFn: (eventId: string) => apiRequest("POST", `/api/events/${eventId}/register`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events/my-events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({
         title: "Geregistreer",
-        description: "Jy is aangemeld vir die gebeurtenis!",
+        description: "Jy is geregistreer vir hierdie gebeurtenis.",
       });
     },
-    onError: (error: unknown) => {
+    onError: () => {
       toast({
         title: "Kon nie registreer nie",
-        description: error instanceof Error ? error.message : "Probeer weer later.",
+        description: "Maak seker daar is nog plek beskikbaar en probeer weer.",
         variant: "destructive",
       });
     },
   });
 
   const cancelMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      await apiRequest(`/api/events/${eventId}/register`, "DELETE");
-    },
+    mutationFn: (eventId: string) => apiRequest("DELETE", `/api/events/${eventId}/register`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events/my-events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({
         title: "Registrasie gekanselleer",
-        description: "Ons het jou plek vrygestel.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Kon nie kanselleer nie",
-        description: "Probeer asseblief weer.",
-        variant: "destructive",
+        description: "Ons het jou plek vir die gebeurtenis vrygestel.",
       });
     },
   });
 
-  const isLoading = eventsQuery.isLoading || myEventsQuery.isLoading;
+  const formatDate = (value: string) =>
+    new Date(value).toLocaleString("af-ZA", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("af-ZA", { style: "currency", currency: "ZAR" }).format(value);
+
+  const isRegistered = (eventId: string) => myEvents.some((event) => event.id === eventId);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900">Literêre gebeurtenisse</h1>
-            <p className="text-slate-600">
-              Vind boekbekendstellings, poësie-aande en werkswinkels regoor Suid-Afrika.
+            <h1 className="text-3xl font-bold text-foreground">Literêre Gebeure</h1>
+            <p className="text-muted-foreground max-w-3xl">
+              Ontdek boekbekendstellings, outeursgesprekke en werkswinkels dwarsdeur Suid-Afrika. Reserveer jou plek of stel waarskuwings op.
             </p>
           </div>
-          <Button variant="outline" onClick={() => setAlertsOpen(true)}>
-            <Bell className="h-4 w-4 mr-2" />
-            Stel kennisgewings op
+          <Button variant="outline" className="flex items-center space-x-2" onClick={() => setAlertOpen(true)}>
+            <Bell className="h-4 w-4" />
+            <span>Stel herinnering in</span>
           </Button>
         </header>
 
-        {isLoading && (
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Card key={index} className="h-64 animate-pulse bg-slate-200/70" />
+        {isPending ? (
+          <Card className="animate-pulse">
+            <CardContent className="p-8 space-y-3">
+              <div className="h-6 bg-muted rounded w-1/3" />
+              <div className="h-4 bg-muted rounded w-2/3" />
+              <div className="h-24 bg-muted rounded" />
+            </CardContent>
+          </Card>
+        ) : events.length === 0 ? (
+          <Card>
+            <CardContent className="py-14 text-center space-y-3">
+              <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground" />
+              <h2 className="text-lg font-semibold text-foreground">Geen komende gebeurtenisse nie</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Meld aan vir herinnerings om nuus te kry oor toekomstige literêre happenings in jou omgewing.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {events.map((event) => (
+              <Card key={event.id}>
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-semibold text-foreground">{event.title}</h2>
+                        <Badge variant="secondary">{event.eventType.replace("_", " ")}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4" /> {formatDate(event.startDate)}
+                        {event.endDate && (
+                          <span className="text-xs text-muted-foreground">- {formatDate(event.endDate)}</span>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <MapPin className="h-4 w-4" /> {event.venue}, {event.city}
+                      </p>
+                      {event.featuredAuthor && (
+                        <p className="text-sm text-muted-foreground">Gasspreker: {event.featuredAuthor}</p>
+                      )}
+                      {event.description && (
+                        <p className="text-sm text-muted-foreground max-w-3xl">{event.description}</p>
+                      )}
+                      {event.tags && event.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {event.tags.map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-start gap-3">
+                      <div className="text-sm text-muted-foreground">
+                        {event.price > 0 ? formatCurrency(event.price) : "Gratis toegang"}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span>
+                          {event.currentAttendees}/{event.maxAttendees ?? "∞"} plekke
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() =>
+                          isRegistered(event.id)
+                            ? cancelMutation.mutate(event.id)
+                            : registerMutation.mutate(event.id)
+                        }
+                        disabled={registerMutation.isPending || cancelMutation.isPending}
+                        className="mt-2"
+                      >
+                        {isRegistered(event.id) ? "Kanselleer registrasie" : "Reserveer plek"}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
 
-        {eventsQuery.isError && (
-          <Card>
-            <CardContent className="py-10 text-center space-y-4">
-              <p className="text-slate-600">Kon nie gebeurtenisse laai nie.</p>
-              <Button onClick={() => eventsQuery.refetch()} variant="outline">
-                Probeer weer
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
-          <div className="space-y-4">
-            {eventsQuery.data?.map((event) => {
-              const registration = registeredMap.get(event.id);
-              const isRegistered = Boolean(registration);
-              const capacityLeft = event.maxAttendees
-                ? Math.max(0, event.maxAttendees - (event.currentAttendees || 0))
-                : null;
-
-              return (
-                <Card key={event.id}>
-                  <CardHeader className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <CardTitle className="text-2xl font-semibold text-slate-900">{event.title}</CardTitle>
-                      <CardDescription>{event.description}</CardDescription>
-                    </div>
-                    <div className="flex flex-wrap gap-2 items-center">
-                      <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
-                        {eventTypeLabels[event.eventType] ?? event.eventType}
-                      </Badge>
-                      <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200">
-                        {formatCurrency(event.price || 0)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-3 sm:grid-cols-2 text-sm text-slate-600">
-                      <div className="flex items-start gap-2">
-                        <CalendarDays className="h-4 w-4 mt-1 text-slate-500" />
-                        <span>{formatDateRange(event.startDate, event.endDate)}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-1 text-slate-500" />
-                        <span>
-                          {event.venue}, {event.city}
-                        </span>
-                      </div>
-                      {event.featuredAuthor && (
-                        <div>
-                          <span className="font-medium text-slate-700">Uitgeligte outeur:</span>{" "}
-                          {event.featuredAuthor}
-                        </div>
-                      )}
-                      {event.featuredBook && (
-                        <div>
-                          <span className="font-medium text-slate-700">Uitgeligte boek:</span>{" "}
-                          {event.featuredBook}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4 text-slate-500" />
-                        <span>
-                          {event.currentAttendees ?? 0} geregistreer
-                          {event.maxAttendees ? ` / ${event.maxAttendees}` : ""}
-                        </span>
-                      </div>
-                      {capacityLeft !== null && (
-                        <Badge variant={capacityLeft > 0 ? "secondary" : "destructive"}>
-                          {capacityLeft > 0 ? `${capacityLeft} plekke oor` : "Vol"
-                          }
-                        </Badge>
-                      )}
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-sm text-slate-500">
-                        {event.organizer} • {event.organizerContact || "Geen kontak beskikbaar"}
-                      </div>
-                      {isRegistered ? (
-                        <div className="flex items-center gap-3">
-                          <Badge className="bg-green-100 text-green-700">
-                            <Check className="h-3 w-3 mr-1" /> Geregistreer
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-600"
-                            onClick={() => cancelMutation.mutate(event.id)}
-                            disabled={cancelMutation.isPending}
-                          >
-                            {cancelMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <XCircle className="h-4 w-4 mr-2" />
-                            )}
-                            Kanselleer
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          onClick={() => registerMutation.mutate(event.id)}
-                          disabled={registerMutation.isPending || capacityLeft === 0}
-                        >
-                          {registerMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Users className="h-4 w-4 mr-2" />
-                          )}
-                          Bespreek plek
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          <aside className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-slate-900">My registrasies</CardTitle>
-                <CardDescription>
-                  Bestuur jou komende gebeurtenisse en hou rekord van vorige bywoning.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {myEventsQuery.data?.length ? (
-                  myEventsQuery.data.map((registration) => (
-                    <div key={registration.id} className="p-3 rounded-lg border border-slate-200 space-y-1">
-                      <p className="font-semibold text-slate-900">{registration.title}</p>
-                      <p className="text-sm text-slate-600">
-                        {formatDateRange(registration.startDate, registration.endDate)}
-                      </p>
-                      <Badge variant="outline" className="mt-1">
-                        Status: {registration.registrationStatus}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-600">Geen registrasies nog nie.</p>
-                )}
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
+        <Advertisement position="footer" />
       </main>
 
-      <EventAlertModal open={alertsOpen} onOpenChange={setAlertsOpen} />
+      <EventAlertModal open={isAlertOpen} onOpenChange={setAlertOpen} />
     </div>
   );
 }

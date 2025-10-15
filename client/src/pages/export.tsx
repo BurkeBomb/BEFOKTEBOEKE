@@ -1,32 +1,21 @@
 import NavigationBar from "@/components/navigation-bar";
 import EnhancedExport from "@/components/enhanced-export";
-import AdvertisementComponent from "@/components/advertisement";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Advertisement from "@/components/advertisement";
 
 export default function ExportPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background/70">
       <NavigationBar />
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-        <section className="space-y-2">
-          <h1 className="text-3xl font-black text-slate-900">Uitvoer en verslae</h1>
-          <p className="text-slate-600">
-            Skep professionele verslae van jou versameling vir versekeringsdoeleindes, deel of persoonlike argivering.
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">Uitvoer en Deel</h1>
+          <p className="text-muted-foreground max-w-3xl">
+            Skep professionele verslae van jou versameling, deel jou katalogus en rugsteun jou data met een klik.
           </p>
-        </section>
+        </header>
 
         <EnhancedExport />
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-slate-900">
-              Vennoot aanbevelings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AdvertisementComponent position="banner" />
-          </CardContent>
-        </Card>
+        <Advertisement position="inline" />
       </main>
     </div>
   );

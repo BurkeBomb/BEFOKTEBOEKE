@@ -1,13 +1,5 @@
-import { ApiError } from "@/lib/queryClient";
+import { ApiError } from "./queryClient";
 
-export function isUnauthorizedError(error: unknown): boolean {
-  if (error instanceof ApiError) {
-    return error.status === 401 || error.status === 403;
-  }
-
-  if (error instanceof Error) {
-    return /unauthorized/i.test(error.message);
-  }
-
-  return false;
+export function isUnauthorizedError(error: unknown): error is ApiError {
+  return error instanceof ApiError && error.status === 401;
 }

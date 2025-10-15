@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { CheckedState } from "@radix-ui/react-checkbox";
 
 interface CameraBookScannerProps {
   open: boolean;
@@ -156,11 +155,9 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
     setIsAnalyzing(true);
     
     try {
-      const response = await apiRequest("POST", "/api/books/analyze-cover", {
+      const bookInfo = await apiRequest("POST", "/api/books/analyze-cover", {
         image: imageData.split(',')[1], // Remove data:image/jpeg;base64, prefix
       });
-      
-      const bookInfo = await response.json();
       setDetectedBook(bookInfo);
       
       toast({
@@ -179,17 +176,8 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
     }
   };
 
-  const addBookMutation = useMutation<Response, unknown, {
-    title: string;
-    author: string;
-    year?: number;
-    genre: string;
-    description?: string;
-    isRare: boolean;
-    addToWishlist: boolean;
-    capturedImage: string | null;
-  }>({
-    mutationFn: async (bookData) => {
+  const addBookMutation = useMutation({
+    mutationFn: async (bookData: any) => {
       return apiRequest("POST", "/api/books/add-from-camera", bookData);
     },
     onSuccess: () => {
@@ -417,20 +405,20 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
                 {/* Add Book Options */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="wishlist"
-                    checked={addToWishlist}
-                    onCheckedChange={(checked: CheckedState) => setAddToWishlist(checked === true)}
-                  />
+                    <Checkbox
+                      id="wishlist"
+                      checked={addToWishlist}
+                      onCheckedChange={(checked) => setAddToWishlist(checked === true)}
+                    />
                     <Label htmlFor="wishlist">Voeg by wenslys</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="rare"
-                    checked={isRare}
-                    onCheckedChange={(checked: CheckedState) => setIsRare(checked === true)}
-                  />
+                    <Checkbox
+                      id="rare"
+                      checked={isRare}
+                      onCheckedChange={(checked) => setIsRare(checked === true)}
+                    />
                     <Label htmlFor="rare">Merk as skaars</Label>
                   </div>
                 </div>
