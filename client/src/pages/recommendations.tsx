@@ -1,5 +1,6 @@
 import NavigationBar from "@/components/navigation-bar";
 import SmartRecommendations from "@/components/smart-recommendations";
+<<<<<<< HEAD
 import Advertisement from "@/components/advertisement";
 
 export default function RecommendationsPage() {
@@ -18,5 +19,18 @@ export default function RecommendationsPage() {
         <Advertisement position="inline" />
       </main>
     </div>
+=======
+import { useAuth } from "@/hooks/useAuth";
+
+export default function RecommendationsPage() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <SmartRecommendations />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }

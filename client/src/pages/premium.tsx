@@ -1,5 +1,6 @@
 import NavigationBar from "@/components/navigation-bar";
 import PremiumSubscription from "@/components/premium-subscription";
+<<<<<<< HEAD
 import Advertisement from "@/components/advertisement";
 
 export default function PremiumPage() {
@@ -18,5 +19,18 @@ export default function PremiumPage() {
         <Advertisement position="footer" />
       </main>
     </div>
+=======
+import { useAuth } from "@/hooks/useAuth";
+
+export default function PremiumPage() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <PremiumSubscription />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }

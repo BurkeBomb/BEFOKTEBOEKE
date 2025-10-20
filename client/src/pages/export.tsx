@@ -1,5 +1,6 @@
 import NavigationBar from "@/components/navigation-bar";
 import EnhancedExport from "@/components/enhanced-export";
+<<<<<<< HEAD
 import Advertisement from "@/components/advertisement";
 
 export default function ExportPage() {
@@ -18,5 +19,18 @@ export default function ExportPage() {
         <Advertisement position="inline" />
       </main>
     </div>
+=======
+import { useAuth } from "@/hooks/useAuth";
+
+export default function ExportPage() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <EnhancedExport />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }

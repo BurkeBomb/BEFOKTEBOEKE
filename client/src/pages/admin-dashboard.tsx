@@ -1,5 +1,6 @@
 import NavigationBar from "@/components/navigation-bar";
 import AdminRevenueDashboard from "@/components/admin-revenue-dashboard";
+<<<<<<< HEAD
 import AdvancedAnalytics from "@/components/advanced-analytics";
 import Advertisement from "@/components/advertisement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,5 +38,18 @@ export default function AdminDashboard() {
         </div>
       </main>
     </div>
+=======
+import { useAuth } from "@/hooks/useAuth";
+
+export default function AdminDashboard() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <AdminRevenueDashboard />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }

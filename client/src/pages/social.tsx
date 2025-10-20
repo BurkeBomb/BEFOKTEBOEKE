@@ -1,5 +1,6 @@
 import NavigationBar from "@/components/navigation-bar";
 import SocialFeatures from "@/components/social-features";
+<<<<<<< HEAD
 import Advertisement from "@/components/advertisement";
 
 export default function SocialPage() {
@@ -18,5 +19,18 @@ export default function SocialPage() {
         <Advertisement position="footer" />
       </main>
     </div>
+=======
+import { useAuth } from "@/hooks/useAuth";
+
+export default function SocialPage() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <SocialFeatures />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }

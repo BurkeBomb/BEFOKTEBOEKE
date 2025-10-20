@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import NavigationBar from "@/components/navigation-bar";
@@ -171,5 +172,20 @@ export default function PriceComparisonPage() {
         <Advertisement position="footer" />
       </main>
     </div>
+=======
+import NavigationBar from "@/components/navigation-bar";
+import WishlistSearch from "@/components/wishlist-search";
+import { useAuth } from "@/hooks/useAuth";
+
+export default function PriceComparison() {
+  const { user } = useAuth();
+  return (
+    <>
+      <NavigationBar />
+      <div className="p-6">
+        <WishlistSearch />
+      </div>
+    </>
+>>>>>>> codex/implement-page-layouts-and-navigation
   );
 }
