@@ -1,16 +1,25 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, MousePointer, Eye, Calendar } from "lucide-react";
+import type { RevenueStats, TopAdPerformance } from "@/types/api";
 
 export default function AdminRevenueDashboard() {
-  const { data: revenueStats, isLoading } = useQuery({
+  const { data: revenueStats, isLoading } = useQuery<RevenueStats>({
     queryKey: ["/api/admin/revenue/stats"],
   });
 
-  const { data: topAds } = useQuery({
+  const { data: topAdsData } = useQuery<TopAdPerformance[]>({
     queryKey: ["/api/admin/revenue/top-ads"],
   });
+
+  const topAds = useMemo(() => {
+    return (topAdsData ?? []).map((ad) => ({
+      ...ad,
+      ctr: typeof ad.ctr === "string" ? Number(ad.ctr) : ad.ctr,
+    }));
+  }, [topAdsData]);
 
   if (isLoading) {
     return (
@@ -116,7 +125,7 @@ export default function AdminRevenueDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topAds?.map((ad: any, index: number) => (
+            {topAds.map((ad, index) => (
               <div 
                 key={ad.id} 
                 className="flex items-center justify-between p-4 border border-border rounded-lg"
@@ -148,7 +157,7 @@ export default function AdminRevenueDashboard() {
                     </p>
                     <p className="text-muted-foreground">Inkomste</p>
                   </div>
-                  <Badge 
+                  <Badge
                     variant={ad.ctr > 2 ? "default" : "secondary"}
                     className={ad.ctr > 2 ? "bg-primary" : ""}
                   >

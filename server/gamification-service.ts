@@ -91,6 +91,7 @@ export class GamificationService {
         const currentUser = user[0];
         const newTotalPoints = (currentUser.totalPointsEarned || 0) + pointsEarned;
         const newLevel = this.calculateLevel(newTotalPoints);
+        const previousLevel = currentUser.currentLevel ?? 1;
         
         const updates: any = {
           totalPointsEarned: newTotalPoints,
@@ -111,7 +112,7 @@ export class GamificationService {
         // Check for new achievements
         await this.checkAndUnlockAchievements(userId);
         
-        return { pointsEarned, newLevel, leveledUp: newLevel > currentUser.currentLevel };
+        return { pointsEarned, newLevel, leveledUp: newLevel > previousLevel };
       }
       
       return { pointsEarned, newLevel: 1, leveledUp: false };

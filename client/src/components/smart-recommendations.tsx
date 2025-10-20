@@ -3,11 +3,11 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Brain, 
-  ThumbsUp, 
-  ThumbsDown, 
-  BookOpen, 
+import {
+  Brain,
+  ThumbsUp,
+  ThumbsDown,
+  BookOpen,
   Sparkles,
   TrendingUp,
   Calendar,
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { RecommendationStats } from "@/types/api";
 
 interface Recommendation {
   id: string;
@@ -34,7 +35,7 @@ export default function SmartRecommendations() {
     queryKey: ["/api/recommendations"],
   });
 
-  const { data: recommendationStats } = useQuery({
+  const { data: recommendationStats } = useQuery<RecommendationStats>({
     queryKey: ["/api/recommendations/stats"],
   });
 

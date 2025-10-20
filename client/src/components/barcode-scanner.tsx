@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import type { CheckedState } from "@radix-ui/react-checkbox";
 
 interface BarcodeScannerProps {
   open: boolean;
@@ -153,7 +154,7 @@ export default function BarcodeScanner({ open, onOpenChange }: BarcodeScannerPro
     
     try {
       const response = await apiRequest("POST", "/api/books/lookup-isbn", { isbn });
-      const bookInfo = await response.json();
+      const bookInfo = (await response.json()) as BookInfo;
       setDetectedBook(bookInfo);
       
       toast({
@@ -172,8 +173,8 @@ export default function BarcodeScanner({ open, onOpenChange }: BarcodeScannerPro
     }
   };
 
-  const addBookMutation = useMutation({
-    mutationFn: async (bookData: any) => {
+  const addBookMutation = useMutation<Response, unknown, BookInfo & { isRare: boolean; addToWishlist: boolean }>({
+    mutationFn: async (bookData) => {
       return apiRequest("POST", "/api/books/add-from-isbn", bookData);
     },
     onSuccess: () => {
@@ -412,20 +413,20 @@ export default function BarcodeScanner({ open, onOpenChange }: BarcodeScannerPro
                 {/* Add Book Options */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="wishlist"
-                      checked={addToWishlist}
-                      onCheckedChange={setAddToWishlist}
-                    />
+                  <Checkbox
+                    id="wishlist"
+                    checked={addToWishlist}
+                    onCheckedChange={(checked: CheckedState) => setAddToWishlist(checked === true)}
+                  />
                     <Label htmlFor="wishlist">Voeg by wenslys</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="rare"
-                      checked={isRare}
-                      onCheckedChange={setIsRare}
-                    />
+                  <Checkbox
+                    id="rare"
+                    checked={isRare}
+                    onCheckedChange={(checked: CheckedState) => setIsRare(checked === true)}
+                  />
                     <Label htmlFor="rare">Merk as skaars</Label>
                   </div>
                 </div>

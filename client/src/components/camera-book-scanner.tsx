@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import type { CheckedState } from "@radix-ui/react-checkbox";
 
 interface CameraBookScannerProps {
   open: boolean;
@@ -178,8 +179,17 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
     }
   };
 
-  const addBookMutation = useMutation({
-    mutationFn: async (bookData: any) => {
+  const addBookMutation = useMutation<Response, unknown, {
+    title: string;
+    author: string;
+    year?: number;
+    genre: string;
+    description?: string;
+    isRare: boolean;
+    addToWishlist: boolean;
+    capturedImage: string | null;
+  }>({
+    mutationFn: async (bookData) => {
       return apiRequest("POST", "/api/books/add-from-camera", bookData);
     },
     onSuccess: () => {
@@ -407,20 +417,20 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
                 {/* Add Book Options */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="wishlist"
-                      checked={addToWishlist}
-                      onCheckedChange={setAddToWishlist}
-                    />
+                  <Checkbox
+                    id="wishlist"
+                    checked={addToWishlist}
+                    onCheckedChange={(checked: CheckedState) => setAddToWishlist(checked === true)}
+                  />
                     <Label htmlFor="wishlist">Voeg by wenslys</Label>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="rare"
-                      checked={isRare}
-                      onCheckedChange={setIsRare}
-                    />
+                  <Checkbox
+                    id="rare"
+                    checked={isRare}
+                    onCheckedChange={(checked: CheckedState) => setIsRare(checked === true)}
+                  />
                     <Label htmlFor="rare">Merk as skaars</Label>
                   </div>
                 </div>

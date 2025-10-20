@@ -15,6 +15,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Bell, MapPin, User, Tag } from "lucide-react";
+import type { CheckedState } from "@radix-ui/react-checkbox";
 
 interface EventAlertModalProps {
   open: boolean;
@@ -195,7 +196,7 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
               <Checkbox
                 id="email"
                 checked={emailNotifications}
-                onCheckedChange={setEmailNotifications}
+                onCheckedChange={(checked: CheckedState) => setEmailNotifications(checked === true)}
               />
               <Label htmlFor="email" className="text-sm">
                 E-pos kennisgewings
@@ -206,7 +207,7 @@ export default function EventAlertModal({ open, onOpenChange }: EventAlertModalP
               <Checkbox
                 id="sms"
                 checked={smsNotifications}
-                onCheckedChange={setSmsNotifications}
+                onCheckedChange={(checked: CheckedState) => setSmsNotifications(checked === true)}
               />
               <Label htmlFor="sms" className="text-sm">
                 SMS kennisgewings

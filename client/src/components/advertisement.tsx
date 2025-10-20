@@ -13,8 +13,8 @@ interface AdvertisementProps {
 
 export default function AdvertisementComponent({ position, className = "" }: AdvertisementProps) {
   const [impressionTracked, setImpressionTracked] = useState(false);
-  
-  const { data: ads, isLoading } = useQuery({
+
+  const { data: ads, isLoading } = useQuery<Advertisement[]>({
     queryKey: ["/api/advertisements", position],
   });
 
@@ -36,7 +36,7 @@ export default function AdvertisementComponent({ position, className = "" }: Adv
     },
   });
 
-  const currentAd = ads?.[0] as Advertisement;
+  const currentAd = ads?.[0] ?? null;
 
   // Track impression when ad becomes visible
   useEffect(() => {

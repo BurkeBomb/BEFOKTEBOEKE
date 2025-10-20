@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  MessageSquare, 
-  Heart, 
-  Star, 
+import {
+  Users,
+  MessageSquare,
+  Heart,
+  Star,
   Trophy,
   Target,
   BookOpen,
@@ -19,29 +19,36 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type {
+  BadgeSummary,
+  BookClubSummary,
+  ChallengeSummary,
+  LeaderboardEntry,
+  ReviewSummary,
+} from "@/types/api";
 
 export default function SocialFeatures() {
   const [activeTab, setActiveTab] = useState("reviews");
   const [newReview, setNewReview] = useState({ bookId: "", rating: 5, review: "" });
   const { toast } = useToast();
 
-  const { data: reviews } = useQuery({
+  const { data: reviews } = useQuery<ReviewSummary[]>({
     queryKey: ["/api/social/reviews"],
   });
 
-  const { data: bookClubs } = useQuery({
+  const { data: bookClubs } = useQuery<BookClubSummary[]>({
     queryKey: ["/api/social/book-clubs"],
   });
 
-  const { data: challenges } = useQuery({
+  const { data: challenges } = useQuery<ChallengeSummary[]>({
     queryKey: ["/api/social/challenges"],
   });
 
-  const { data: badges } = useQuery({
+  const { data: badges } = useQuery<BadgeSummary[]>({
     queryKey: ["/api/social/badges"],
   });
 
-  const { data: leaderboard } = useQuery({
+  const { data: leaderboard } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/social/leaderboard"],
   });
 
@@ -180,7 +187,7 @@ export default function SocialFeatures() {
           </Card>
 
           <div className="space-y-4">
-            {reviews?.map((review: any) => (
+            {reviews?.map((review) => (
               <Card key={review.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
@@ -233,7 +240,7 @@ export default function SocialFeatures() {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {bookClubs?.map((club: any) => (
+              {bookClubs?.map((club) => (
               <Card key={club.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
@@ -263,7 +270,7 @@ export default function SocialFeatures() {
       {activeTab === "challenges" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {challenges?.map((challenge: any) => (
+              {challenges?.map((challenge) => (
               <Card key={challenge.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -311,7 +318,7 @@ export default function SocialFeatures() {
       {activeTab === "badges" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {badges?.map((badge: any) => (
+              {badges?.map((badge) => (
               <Card key={badge.id} className="text-center">
                 <CardContent className="p-4">
                   <div className="flex justify-center mb-2">
@@ -347,7 +354,7 @@ export default function SocialFeatures() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {leaderboard?.map((user: any, index: number) => (
+              {leaderboard?.map((user, index) => (
                 <div key={user.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">

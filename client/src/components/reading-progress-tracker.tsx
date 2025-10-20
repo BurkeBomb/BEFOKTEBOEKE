@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BookOpen, CheckCircle, Plus, Target, Zap } from "lucide-react";
+import type { ReadingActivityResponse } from "@/types/api";
 
 interface ReadingProgressTrackerProps {
   bookId: string;
@@ -32,13 +33,14 @@ export default function ReadingProgressTracker({
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const recordActivityMutation = useMutation({
-    mutationFn: async ({ activityType, pages }: { activityType: string; pages?: number }) => {
-      return await apiRequest("POST", "/api/reading-activity", {
+  const recordActivityMutation = useMutation<ReadingActivityResponse, unknown, { activityType: string; pages?: number }>({
+    mutationFn: async ({ activityType, pages }) => {
+      const response = await apiRequest("POST", "/api/reading-activity", {
         bookId,
         activityType,
         pagesRead: pages || 0,
       });
+      return await response.json() as ReadingActivityResponse;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/stats"] });

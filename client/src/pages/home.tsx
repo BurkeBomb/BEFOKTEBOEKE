@@ -48,6 +48,10 @@ export default function Home() {
     }).slice(0, 6);
   }, [booksQuery.data]);
 
+  const currentReadingBook = useMemo(() => {
+    return booksQuery.data?.find((book) => book.readingStatus === "reading") ?? null;
+  }, [booksQuery.data]);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <NavigationBar />
@@ -148,7 +152,30 @@ export default function Home() {
 
           <div className="space-y-6">
             <SmartRecommendations />
-            <ReadingProgressTracker />
+            {currentReadingBook ? (
+              <ReadingProgressTracker
+                bookId={currentReadingBook.id}
+                bookTitle={currentReadingBook.title}
+                totalPages={currentReadingBook.pageCount ?? undefined}
+                currentPages={0}
+                readingStatus={(currentReadingBook.readingStatus as "unread" | "reading" | "read") ?? "unread"}
+                onStatusUpdate={() => {
+                  booksQuery.refetch();
+                  statsQuery.refetch();
+                }}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-900">
+                    Geen aktiewe leeswerk
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-slate-600">
+                  Begin 'n boek om jou leesvordering hier dop te hou.
+                </CardContent>
+              </Card>
+            )}
             <AchievementsPanel />
             <AffiliateMarketing />
             <AdvertisementComponent position="sidebar" />
@@ -156,7 +183,7 @@ export default function Home() {
         </section>
       </main>
 
-      {shareBook && (
+      {shareBook ? (
         <BookShareModal
           open={Boolean(shareBook)}
           onOpenChange={(open) => {
@@ -166,7 +193,7 @@ export default function Home() {
           }}
           book={shareBook}
         />
-      )}
+      ) : null}
     </div>
   );
 }
