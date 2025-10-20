@@ -16,6 +16,10 @@ export default function AdvertisementComponent({ position, className = "" }: Adv
   
   const { data: ads, isLoading } = useQuery({
     queryKey: ["/api/advertisements", position],
+    queryFn: ({ queryKey, signal }) => {
+      const [, slot] = queryKey as [string, AdvertisementProps["position"]];
+      return apiRequest(`/api/advertisements/${slot}`, { signal });
+    },
   });
 
   const trackImpressionMutation = useMutation({

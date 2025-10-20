@@ -110,7 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use AI to predict genre if description is provided
       if (validatedData.description && validatedData.description.trim().length > 0) {
         try {
-          // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+          // Do not change this unless explicitly requested by the user.
           const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -564,7 +565,7 @@ Year: ${validatedData.year || "Unknown"}`,
   });
 
   // Premium Subscription Routes
-  app.get("/api/subscription/status", isAuthenticated, async (req, res) => {
+  app.get("/api/subscription/status", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
@@ -882,7 +883,8 @@ Year: ${validatedData.year || "Unknown"}`,
       res.json(registration);
     } catch (error) {
       console.error("Error registering for event:", error);
-      res.status(500).json({ message: error.message || "Failed to register for event" });
+      const message = error instanceof Error && error.message ? error.message : "Failed to register for event";
+      res.status(500).json({ message });
     }
   });
 
@@ -927,7 +929,8 @@ Year: ${validatedData.year || "Unknown"}`,
         return res.status(400).json({ message: "No image provided" });
       }
 
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+      // Do not change this unless explicitly requested by the user.
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -1079,7 +1082,8 @@ Year: ${validatedData.year || "Unknown"}`,
       // 3. Use AI as fallback to generate likely book info
       if (!bookInfo) {
         try {
-          // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          // The newest OpenAI model is "gpt-4o," released May 13, 2024.
+          // Do not change this unless explicitly requested by the user.
           const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [

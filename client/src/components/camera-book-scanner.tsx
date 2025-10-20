@@ -155,11 +155,9 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
     setIsAnalyzing(true);
     
     try {
-      const response = await apiRequest("POST", "/api/books/analyze-cover", {
+      const bookInfo = await apiRequest("POST", "/api/books/analyze-cover", {
         image: imageData.split(',')[1], // Remove data:image/jpeg;base64, prefix
       });
-      
-      const bookInfo = await response.json();
       setDetectedBook(bookInfo);
       
       toast({
@@ -410,7 +408,7 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
                     <Checkbox
                       id="wishlist"
                       checked={addToWishlist}
-                      onCheckedChange={setAddToWishlist}
+                      onCheckedChange={(checked) => setAddToWishlist(checked === true)}
                     />
                     <Label htmlFor="wishlist">Voeg by wenslys</Label>
                   </div>
@@ -419,7 +417,7 @@ export default function CameraBookScanner({ open, onOpenChange }: CameraBookScan
                     <Checkbox
                       id="rare"
                       checked={isRare}
-                      onCheckedChange={setIsRare}
+                      onCheckedChange={(checked) => setIsRare(checked === true)}
                     />
                     <Label htmlFor="rare">Merk as skaars</Label>
                   </div>
