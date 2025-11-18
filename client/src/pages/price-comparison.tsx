@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Loader2, RefreshCcw, ShoppingCart, Sparkles } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { PriceComparisonSummary } from "@/types/api";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("af-ZA", {
@@ -20,7 +21,7 @@ export default function PriceComparison() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const comparisonsQuery = useQuery({
+  const comparisonsQuery = useQuery<PriceComparisonSummary[]>({
     queryKey: ["/api/price-comparison"],
   });
 
@@ -110,7 +111,7 @@ export default function PriceComparison() {
           </Card>
         )}
 
-        {comparisonsQuery.data?.map((comparison: any) => (
+        {comparisonsQuery.data?.map((comparison) => (
           <Card key={comparison.id}>
             <CardHeader className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
               <div>
@@ -146,7 +147,7 @@ export default function PriceComparison() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {comparison.stores?.map((store: any) => (
+                  {comparison.stores?.map((store) => (
                     <TableRow key={store.id}>
                       <TableCell>
                         <div className="font-medium text-slate-900">{store.store}</div>

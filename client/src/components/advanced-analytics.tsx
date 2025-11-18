@@ -2,27 +2,37 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
-  MapPin, 
+import {
+  TrendingUp,
+  Users,
+  BookOpen,
+  MapPin,
   Calendar,
   BarChart3,
   PieChart,
   Target
 } from "lucide-react";
+import type {
+  BookAnalyticsData,
+  GeographicAnalyticsData,
+  UserAnalyticsData,
+  GenreDistributionStat,
+  PopularBookStat,
+  RegionAnalytics,
+  PeakHourUsage,
+  DeviceUsageBreakdown,
+} from "@/types/api";
 
 export default function AdvancedAnalytics() {
-  const { data: userAnalytics, isLoading } = useQuery({
+  const { data: userAnalytics, isLoading } = useQuery<UserAnalyticsData>({
     queryKey: ["/api/admin/analytics/users"],
   });
 
-  const { data: bookAnalytics } = useQuery({
+  const { data: bookAnalytics } = useQuery<BookAnalyticsData>({
     queryKey: ["/api/admin/analytics/books"],
   });
 
-  const { data: geographicData } = useQuery({
+  const { data: geographicData } = useQuery<GeographicAnalyticsData>({
     queryKey: ["/api/admin/analytics/geographic"],
   });
 
@@ -110,7 +120,7 @@ export default function AdvancedAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {bookAnalytics?.popularBooks?.map((book: any, index: number) => (
+              {bookAnalytics?.popularBooks?.map((book: PopularBookStat, index: number) => (
                 <div key={book.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -143,7 +153,7 @@ export default function AdvancedAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {bookAnalytics?.genreDistribution?.map((genre: any) => (
+              {bookAnalytics?.genreDistribution?.map((genre: GenreDistributionStat) => (
                 <div key={genre.name} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-foreground">{genre.name}</span>
@@ -171,7 +181,7 @@ export default function AdvancedAnalytics() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {geographicData?.regions?.map((region: any) => (
+            {geographicData?.regions?.map((region: RegionAnalytics) => (
               <div 
                 key={region.name} 
                 className="p-4 border border-border rounded-lg text-center"
@@ -210,7 +220,7 @@ export default function AdvancedAnalytics() {
             <div>
               <h4 className="font-semibold text-foreground mb-4">Piek Gebruikstye</h4>
               <div className="space-y-3">
-                {userAnalytics?.peakHours?.map((hour: any) => (
+                {userAnalytics?.peakHours?.map((hour: PeakHourUsage) => (
                   <div key={hour.time} className="flex justify-between items-center">
                     <span className="text-sm text-foreground">{hour.time}</span>
                     <div className="flex items-center space-x-2">
@@ -229,7 +239,7 @@ export default function AdvancedAnalytics() {
             <div>
               <h4 className="font-semibold text-foreground mb-4">Toestel Tipes</h4>
               <div className="space-y-3">
-                {userAnalytics?.deviceTypes?.map((device: any) => (
+                {userAnalytics?.deviceTypes?.map((device: DeviceUsageBreakdown) => (
                   <div key={device.type} className="flex justify-between items-center">
                     <span className="text-sm text-foreground">{device.type}</span>
                     <div className="flex items-center space-x-2">

@@ -11,6 +11,7 @@ import { Loader2, Bell, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Book } from "@shared/schema";
+import type { PriceAlertSummary } from "@/types/api";
 
 function formatCurrency(value: number | null | undefined) {
   const amount = typeof value === "number" ? value : 0;
@@ -26,7 +27,7 @@ export default function PriceAlertsPage() {
   const [selectedBookId, setSelectedBookId] = useState<string | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const alertsQuery = useQuery({
+  const alertsQuery = useQuery<PriceAlertSummary[]>({
     queryKey: ["/api/price-alerts"],
   });
 
@@ -130,7 +131,7 @@ export default function PriceAlertsPage() {
         )}
 
         <div className="grid gap-4">
-          {alertsQuery.data?.map((alert: any) => (
+          {alertsQuery.data?.map((alert) => (
             <Card key={alert.id}>
               <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -143,7 +144,7 @@ export default function PriceAlertsPage() {
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                     Teiken: {formatCurrency(alert.targetPrice)}
                   </Badge>
-                  {alert.currentPrice && (
+                  {alert.currentPrice !== null && alert.currentPrice !== undefined && (
                     <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200">
                       Huidig: {formatCurrency(alert.currentPrice)}
                     </Badge>
@@ -159,7 +160,9 @@ export default function PriceAlertsPage() {
                 <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                   <div>
                     <span className="font-medium text-slate-700">Geskep:</span>{" "}
-                    {new Date(alert.createdAt).toLocaleDateString("af-ZA")}
+                    {alert.createdAt
+                      ? new Date(alert.createdAt).toLocaleDateString("af-ZA")
+                      : "Onbekend"}
                   </div>
                   <div>
                     <span className="font-medium text-slate-700">Kennisgewings:</span>{" "}
@@ -167,10 +170,10 @@ export default function PriceAlertsPage() {
                     {alert.notificationEmail && alert.notificationSms ? " + " : ""}
                     {alert.notificationSms ? "SMS" : !alert.notificationEmail ? "Geen" : ""}
                   </div>
-                  {alert.lastNotifiedAt && (
+                  {alert.lastChecked && (
                     <div>
-                      <span className="font-medium text-slate-700">Laas kennis gegee:</span>{" "}
-                      {new Date(alert.lastNotifiedAt).toLocaleString("af-ZA")}
+                      <span className="font-medium text-slate-700">Laas nagegaan:</span>{" "}
+                      {new Date(alert.lastChecked).toLocaleString("af-ZA")}
                     </div>
                   )}
                 </div>

@@ -19,9 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  Share2, 
-  Download, 
+import {
+  Share2,
+  Download,
   Copy,
   Palette,
   Type,
@@ -34,23 +34,12 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logoImage from "@assets/IMG_0287_1753515119482.png";
-
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  year?: number;
-  genre: string;
-  description?: string;
-  coverImage?: string;
-  personalRating?: number;
-  personalReview?: string;
-}
+import type { Book as BookRecord } from "@shared/schema";
 
 interface BookShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  book: Book;
+  book: BookRecord;
 }
 
 interface QuoteGraphicOptions {
@@ -126,6 +115,7 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      const context = ctx;
 
       // Set canvas size for social media (1080x1080 for Instagram)
       canvas.width = 1080;
@@ -134,139 +124,111 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
       const colors = colorSchemes[shareOptions.colorScheme];
       
       // Clear canvas and set background
-      ctx.fillStyle = colors.background;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = colors.background;
+      context.fillRect(0, 0, canvas.width, canvas.height);
 
       // Add gradient background based on template
       if (shareOptions.template === 'modern') {
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, colors.background);
         gradient.addColorStop(1, colors.secondary);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       // Add decorative elements based on template
       if (shareOptions.template === 'elegant') {
-        // Add subtle border
-        ctx.strokeStyle = colors.primary;
-        ctx.lineWidth = 8;
-        ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+        context.strokeStyle = colors.primary;
+        context.lineWidth = 8;
+        context.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
       }
 
-      // Book cover placeholder or actual cover
       const coverSize = 280;
       const coverX = (canvas.width - coverSize) / 2;
       const coverY = 120;
 
-      if (book.coverImage) {
-        try {
-          const img = new Image();
-          img.onload = () => {
-            ctx.drawImage(img, coverX, coverY, coverSize, coverSize * 1.4);
-            continueDrawing();
-          };
-          img.src = book.coverImage;
-        } catch (error) {
-          drawBookCoverPlaceholder();
-          continueDrawing();
-        }
-      } else {
-        drawBookCoverPlaceholder();
-        continueDrawing();
-      }
+      const drawBookCoverPlaceholder = () => {
+        context.fillStyle = colors.primary;
+        context.fillRect(coverX, coverY, coverSize, coverSize * 1.4);
+        context.fillStyle = colors.background;
+        context.font = 'bold 80px Arial';
+        context.textAlign = 'center';
+        context.fillText('📚', coverX + coverSize / 2, coverY + coverSize * 0.7);
+      };
 
-      function drawBookCoverPlaceholder() {
-        // Draw book cover placeholder
-        ctx.fillStyle = colors.primary;
-        ctx.fillRect(coverX, coverY, coverSize, coverSize * 1.4);
-        
-        // Add book icon
-        ctx.fillStyle = colors.background;
-        ctx.font = 'bold 80px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('📚', coverX + coverSize/2, coverY + coverSize * 0.7);
-      }
+      const continueDrawing = () => {
+        context.fillStyle = colors.text;
+        context.font = `bold ${shareOptions.fontSize === 'large' ? '56' : shareOptions.fontSize === 'medium' ? '48' : '40'}px Arial`;
+        context.textAlign = 'center';
 
-      function continueDrawing() {
-        // Book title
-        ctx.fillStyle = colors.text;
-        ctx.font = `bold ${shareOptions.fontSize === 'large' ? '56' : shareOptions.fontSize === 'medium' ? '48' : '40'}px Arial`;
-        ctx.textAlign = 'center';
-        
-        // Wrap text if too long
         const maxWidth = canvas.width - 120;
         const words = book.title.split(' ');
         let line = '';
         let y = coverY + coverSize * 1.4 + 80;
-        
+
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
-          const metrics = ctx.measureText(testLine);
+          const metrics = context.measureText(testLine);
           const testWidth = metrics.width;
-          
+
           if (testWidth > maxWidth && n > 0) {
-            ctx.fillText(line, canvas.width/2, y);
+            context.fillText(line, canvas.width / 2, y);
             line = words[n] + ' ';
             y += 60;
           } else {
             line = testLine;
           }
         }
-        ctx.fillText(line, canvas.width/2, y);
+        context.fillText(line, canvas.width / 2, y);
 
-        // Author
-        ctx.font = `${shareOptions.fontSize === 'large' ? '36' : shareOptions.fontSize === 'medium' ? '32' : '28'}px Arial`;
-        ctx.fillStyle = colors.primary;
-        ctx.fillText(`deur ${book.author}`, canvas.width/2, y + 60);
+        context.font = `${shareOptions.fontSize === 'large' ? '36' : shareOptions.fontSize === 'medium' ? '32' : '28'}px Arial`;
+        context.fillStyle = colors.primary;
+        context.fillText(`deur ${book.author}`, canvas.width / 2, y + 60);
 
-        // Custom quote or review
-        const quoteText = shareOptions.customQuote || 
-          (shareOptions.includeReview && book.personalReview ? book.personalReview : 
-          `"'n Wonderlike toevoeging tot my Afrikaanse boekversameling!"`);
-        
+        const quoteText = shareOptions.customQuote ||
+          (shareOptions.includeReview && book.personalReview ? book.personalReview :
+            `"'n Wonderlike toevoeging tot my Afrikaanse boekversameling!"`);
+
         if (quoteText) {
-          ctx.font = `italic ${shareOptions.fontSize === 'large' ? '32' : shareOptions.fontSize === 'medium' ? '28' : '24'}px Arial`;
-          ctx.fillStyle = colors.accent;
-          
-          // Wrap quote text
+          context.font = `italic ${shareOptions.fontSize === 'large' ? '32' : shareOptions.fontSize === 'medium' ? '28' : '24'}px Arial`;
+          context.fillStyle = colors.accent;
+
           const quoteWords = quoteText.split(' ');
           let quoteLine = '';
           let quoteY = y + 140;
-          
+
           for (let n = 0; n < quoteWords.length; n++) {
             const testLine = quoteLine + quoteWords[n] + ' ';
-            const metrics = ctx.measureText(testLine);
+            const metrics = context.measureText(testLine);
             const testWidth = metrics.width;
-            
+
             if (testWidth > maxWidth - 200 && n > 0) {
-              ctx.fillText(quoteLine, canvas.width/2, quoteY);
+              context.fillText(quoteLine, canvas.width / 2, quoteY);
               quoteLine = quoteWords[n] + ' ';
               quoteY += 40;
             } else {
               quoteLine = testLine;
             }
           }
-          ctx.fillText(quoteLine, canvas.width/2, quoteY);
+          context.fillText(quoteLine, canvas.width / 2, quoteY);
         }
 
-        // Rating stars
         if (shareOptions.includeRating && book.personalRating) {
           const starSize = 32;
           const starsY = canvas.height - 200;
           const starsStartX = (canvas.width - (5 * starSize * 1.2)) / 2;
-          
-          ctx.font = `${starSize}px Arial`;
+
+          context.font = `${starSize}px Arial`;
           for (let i = 0; i < 5; i++) {
-            ctx.fillStyle = i < book.personalRating ? colors.primary : colors.secondary;
-            ctx.fillText('★', starsStartX + (i * starSize * 1.2), starsY);
+            context.fillStyle = i < book.personalRating ? colors.primary : colors.secondary;
+            context.fillText('★', starsStartX + (i * starSize * 1.2), starsY);
           }
         }
 
-        // BURKEBOOKS logo and branding
         const logoSize = 40;
-        let logoX, logoY;
-        
+        let logoX = 40;
+        let logoY = canvas.height - 80;
+
         switch (shareOptions.logoPosition) {
           case 'top-left':
             logoX = 40;
@@ -290,26 +252,39 @@ export default function BookShareModal({ open, onOpenChange, book }: BookShareMo
             break;
         }
 
-        // Draw logo background circle
-        ctx.fillStyle = colors.primary;
-        ctx.beginPath();
-        ctx.arc(logoX + logoSize/2, logoY - logoSize/2, logoSize/2 + 5, 0, 2 * Math.PI);
-        ctx.fill();
+        context.fillStyle = colors.primary;
+        context.beginPath();
+        context.arc(logoX + logoSize / 2, logoY - logoSize / 2, logoSize / 2 + 5, 0, 2 * Math.PI);
+        context.fill();
 
-        // Add BURKEBOOKS text
-        ctx.fillStyle = colors.text;
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'left';
+        context.fillStyle = colors.text;
+        context.font = 'bold 16px Arial';
+        context.textAlign = shareOptions.logoPosition === 'center' ? 'center' : 'left';
         if (shareOptions.logoPosition === 'center') {
-          ctx.textAlign = 'center';
-          ctx.fillText('BURKEBOOKS', logoX + logoSize/2, logoY + 20);
+          context.fillText('BURKEBOOKS', logoX + logoSize / 2, logoY + 20);
         } else {
-          ctx.fillText('BURKEBOOKS', logoX + logoSize + 10, logoY - logoSize/2 + 6);
+          context.fillText('BURKEBOOKS', logoX + logoSize + 10, logoY - logoSize / 2 + 6);
         }
 
-        // Convert canvas to image
         const imageData = canvas.toDataURL('image/png');
         setGeneratedImage(imageData);
+      };
+
+      if (book.coverImage) {
+        try {
+          const img = new Image();
+          img.onload = () => {
+            context.drawImage(img, coverX, coverY, coverSize, coverSize * 1.4);
+            continueDrawing();
+          };
+          img.src = book.coverImage;
+        } catch (error) {
+          drawBookCoverPlaceholder();
+          continueDrawing();
+        }
+      } else {
+        drawBookCoverPlaceholder();
+        continueDrawing();
       }
     } catch (error) {
       console.error('Error generating quote graphic:', error);

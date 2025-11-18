@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
-  ExternalLink, 
-  Search, 
-  ShoppingCart, 
+import {
+  ExternalLink,
+  Search,
+  ShoppingCart,
   Star,
   TrendingUp,
   DollarSign,
@@ -15,34 +15,17 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-
-interface BookRecommendation {
-  id: string;
-  title: string;
-  author: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  rating: number;
-  reviewCount: number;
-  availability: string;
-  store: string;
-  storeUrl: string;
-  affiliateUrl: string;
-  commission: number;
-  imageUrl?: string;
-  description?: string;
-}
+import type { AffiliateRecommendation, AffiliateStats } from "@/types/api";
 
 export default function AffiliateMarketing() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  const { data: recommendations, isLoading } = useQuery<BookRecommendation[]>({
+  const { data: recommendations, isLoading } = useQuery<AffiliateRecommendation[]>({
     queryKey: ["/api/affiliate/recommendations"],
   });
 
-  const { data: partnerStats } = useQuery({
+  const { data: partnerStats } = useQuery<AffiliateStats>({
     queryKey: ["/api/affiliate/stats"],
   });
 
@@ -74,7 +57,7 @@ export default function AffiliateMarketing() {
     }
   };
 
-  const handleAffiliateClick = (book: BookRecommendation) => {
+  const handleAffiliateClick = (book: AffiliateRecommendation) => {
     trackClickMutation.mutate({ 
       bookId: book.id, 
       affiliateUrl: book.affiliateUrl 

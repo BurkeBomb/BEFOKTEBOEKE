@@ -10,6 +10,7 @@ import { CalendarDays, MapPin, Users, Bell, Loader2, Check, XCircle } from "luci
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Event } from "@shared/schema";
+import type { UserEventRegistration } from "@/types/api";
 
 const eventTypeLabels: Record<string, string> = {
   book_reading: "Boeklesing",
@@ -23,7 +24,7 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat("af-ZA", { style: "currency", currency: "ZAR" }).format(amount);
 }
 
-function formatDateRange(start: string, end?: string | null) {
+function formatDateRange(start: string | Date, end?: string | Date | null) {
   const startDate = new Date(start);
   const formatter = new Intl.DateTimeFormat("af-ZA", {
     weekday: "short",
@@ -47,13 +48,13 @@ export default function EventsPage() {
     queryKey: ["/api/events"],
   });
 
-  const myEventsQuery = useQuery({
+  const myEventsQuery = useQuery<UserEventRegistration[]>({
     queryKey: ["/api/events/my-events"],
   });
 
   const registeredMap = useMemo(() => {
-    const map = new Map<string, any>();
-    myEventsQuery.data?.forEach((event: any) => {
+    const map = new Map<string, UserEventRegistration>();
+    myEventsQuery.data?.forEach((event) => {
       map.set(event.id, event);
     });
     return map;
@@ -262,7 +263,7 @@ export default function EventsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {myEventsQuery.data?.length ? (
-                  myEventsQuery.data.map((registration: any) => (
+                  myEventsQuery.data.map((registration) => (
                     <div key={registration.id} className="p-3 rounded-lg border border-slate-200 space-y-1">
                       <p className="font-semibold text-slate-900">{registration.title}</p>
                       <p className="text-sm text-slate-600">

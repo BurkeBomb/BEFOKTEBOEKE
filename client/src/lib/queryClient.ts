@@ -108,12 +108,22 @@ async function handleError(response: Response): Promise<never> {
     data = await response.text();
   }
 
-  const message =
-    (typeof data === "object" && data !== null && "message" in data && typeof (data as Record<string, unknown>).message === "string"
-      ? (data as Record<string, unknown>).message
-      : undefined) ?? response.statusText ?? "Request failed";
+  let extractedMessage: string | undefined;
 
-  throw new ApiError(message, response.status, data);
+  if (typeof data === "object" && data !== null && "message" in data) {
+    const messageValue = (data as Record<string, unknown>).message;
+    if (typeof messageValue === "string" && messageValue.trim().length > 0) {
+      extractedMessage = messageValue;
+    }
+  } else if (typeof data === "string" && data.trim().length > 0) {
+    extractedMessage = data;
+  }
+
+  const statusText = response.statusText?.trim();
+  const errorMessage: string =
+    extractedMessage ?? (statusText && statusText.length > 0 ? statusText : "Request failed");
+
+  throw new ApiError(errorMessage, response.status, data);
 }
 
 export async function apiRequest(

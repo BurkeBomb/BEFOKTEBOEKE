@@ -6,12 +6,13 @@ import { Search, ExternalLink, ShoppingCart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { WishlistSearchResult } from "@/types/api";
 
 export default function WishlistSearch() {
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
-  const { data: searchResults, refetch, isLoading, error } = useQuery({
+  const { data: searchResults, refetch, isLoading } = useQuery<WishlistSearchResult[]>({
     queryKey: ["/api/wishlist/search-online"],
     enabled: false, // Don't auto-fetch, only on manual trigger
     retry: false,
@@ -63,7 +64,7 @@ export default function WishlistSearch() {
 
       {searchResults && searchResults.length > 0 && (
         <div className="grid gap-4">
-          {searchResults.map((result: any, index: number) => (
+          {searchResults.map((result) => (
             <Card key={result.book.id} className="border border-slate-200">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -84,9 +85,9 @@ export default function WishlistSearch() {
                     Aanbevole Webwerwe:
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {result.suggestedSites.map((site: any, siteIndex: number) => (
+                    {result.suggestedSites.map((site) => (
                       <Button
-                        key={siteIndex}
+                        key={site.url}
                         variant="outline"
                         size="sm"
                         className="justify-start text-left h-auto p-2"
@@ -105,9 +106,9 @@ export default function WishlistSearch() {
                     Google Soekresultate:
                   </h4>
                   <div className="space-y-1">
-                    {result.searchUrls.slice(0, 2).map((search: any, searchIndex: number) => (
+                    {result.searchUrls.slice(0, 2).map((search) => (
                       <Button
-                        key={searchIndex}
+                        key={search.url}
                         variant="ghost"
                         size="sm"
                         className="justify-start text-left h-auto p-2 w-full"

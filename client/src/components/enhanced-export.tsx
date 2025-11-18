@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
-  Download, 
-  FileText, 
-  FileSpreadsheet, 
+import {
+  Download,
+  FileText,
+  FileSpreadsheet,
   Image,
   Cloud,
   Share2,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { ExportHistoryItem } from "@/types/api";
 
 export default function EnhancedExport() {
   const [exportOptions, setExportOptions] = useState({
@@ -28,7 +29,7 @@ export default function EnhancedExport() {
   });
   const { toast } = useToast();
 
-  const { data: exportHistory } = useQuery({
+  const { data: exportHistory } = useQuery<ExportHistoryItem[]>({
     queryKey: ["/api/exports/history"],
   });
 
@@ -58,12 +59,13 @@ export default function EnhancedExport() {
     },
   });
 
-  const shareCollectionMutation = useMutation({
+  const shareCollectionMutation = useMutation<{ shareUrl: string }>({
     mutationFn: async () => {
-      return await apiRequest("/api/collections/share", "POST");
+      const response = await apiRequest("/api/collections/share", "POST");
+      return await response.json() as { shareUrl: string };
     },
     onSuccess: (data) => {
-      navigator.clipboard.writeText(data.shareUrl);
+      void navigator.clipboard.writeText(data.shareUrl);
       toast({
         title: "Deelkoppeling Geskep",
         description: "Deelkoppeling is na jou klipbord gekopieer!",
@@ -254,31 +256,31 @@ export default function EnhancedExport() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {exportHistory?.map((export_item: any) => (
-              <div key={export_item.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+            {exportHistory?.map((exportItem) => (
+              <div key={exportItem.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    {export_item.type === 'pdf' && <FileText className="h-5 w-5 text-primary" />}
-                    {export_item.type === 'csv' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
-                    {export_item.type === 'excel' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
+                    {exportItem.type === 'pdf' && <FileText className="h-5 w-5 text-primary" />}
+                    {exportItem.type === 'csv' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
+                    {exportItem.type === 'excel' && <FileSpreadsheet className="h-5 w-5 text-primary" />}
                   </div>
                   <div>
                     <h4 className="font-medium text-foreground">
-                      {export_item.name || `${export_item.type.toUpperCase()} Uitvoer`}
+                      {exportItem.name || `${exportItem.type.toUpperCase()} Uitvoer`}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(export_item.createdAt).toLocaleDateString('af-ZA')} • {export_item.size}
+                      {new Date(exportItem.createdAt).toLocaleDateString('af-ZA')} • {exportItem.size}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
-                  <Badge 
-                    variant={export_item.status === 'completed' ? 'default' : 'secondary'}
+                  <Badge
+                    variant={exportItem.status === 'completed' ? 'default' : 'secondary'}
                   >
-                    {export_item.status === 'completed' ? 'Gereed' : 'Verwerk'}
+                    {exportItem.status === 'completed' ? 'Gereed' : 'Verwerk'}
                   </Badge>
-                  {export_item.status === 'completed' && (
+                  {exportItem.status === 'completed' && (
                     <Button size="sm" variant="outline">
                       <Download className="h-4 w-4 mr-1" />
                       Laai Af
