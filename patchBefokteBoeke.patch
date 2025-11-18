@@ -1,0 +1,579 @@
+diff --git a/client/src/components/ui/sidebar.tsx b/client/src/components/ui/sidebar.tsx
+--- a/client/src/components/ui/sidebar.tsx
++++ b/client/src/components/ui/sidebar.tsx
+@@ -99,1 +99,1 @@
+-        ? setOpenMobile((open) => !open)
++        ? setOpenMobile((open) => !open)
+@@ -100,1 +100,1 @@
+-        : setOpen((open) => !open)
++        : setOpen((open) => !open);
+@@ -116,1 +116,1 @@
+-      return () => window.removeEventListener("keydown", handleKeyDown)
++      return () => { window.removeEventListener("keydown", handleKeyDown); }
+diff --git a/client/src/components/add-book-dialog.tsx b/client/src/components/add-book-dialog.tsx
+--- a/client/src/components/add-book-dialog.tsx
++++ b/client/src/components/add-book-dialog.tsx
+@@ -82,1 +82,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -83,1 +83,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+@@ -84,1 +84,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/gamification/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/gamification/stats"] });
+@@ -307,1 +307,1 @@
+-                onClick={() => setOpen(false)}
++                onClick={() => { setOpen(false); }}
+diff --git a/client/src/pages/price-alerts.tsx b/client/src/pages/price-alerts.tsx
+--- a/client/src/pages/price-alerts.tsx
++++ b/client/src/pages/price-alerts.tsx
+@@ -93,1 +93,1 @@
+-                  onChange={(event) => setDraftTitle(event.target.value)}
++                  onChange={(event) => { setDraftTitle(event.target.value); }}
+@@ -102,1 +102,1 @@
+-                  onChange={(event) => setDraftAuthor(event.target.value)}
++                  onChange={(event) => { setDraftAuthor(event.target.value); }}
+@@ -114,1 +114,1 @@
+-                  onChange={(event) => setDraftPrice(event.target.value)}
++                  onChange={(event) => { setDraftPrice(event.target.value); }}
+@@ -180,1 +180,1 @@
+-                      onClick={() => deleteAlertMutation.mutate(alert.id)}
++                      onClick={() => { deleteAlertMutation.mutate(alert.id); }}
+diff --git a/client/src/components/achievements-panel.tsx b/client/src/components/achievements-panel.tsx
+--- a/client/src/components/achievements-panel.tsx
++++ b/client/src/components/achievements-panel.tsx
+@@ -131,1 +131,1 @@
+-            onClick={() => setSelectedCategory(category)}
++            onClick={() => { setSelectedCategory(category); }}
+diff --git a/client/src/components/ui/chart.tsx b/client/src/components/ui/chart.tsx
+--- a/client/src/components/ui/chart.tsx
++++ b/client/src/components/ui/chart.tsx
+@@ -146,1 +146,1 @@
+-          ? config[label as keyof typeof config]?.label || label
++          ? config[label as keyof typeof config].label || label
+diff --git a/server/index.ts b/server/index.ts
+--- a/server/index.ts
++++ b/server/index.ts
+@@ -12,1 +12,1 @@
+-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
++  let capturedJsonResponse: Record<string, unknown> | undefined = undefined;
+@@ -42,1 +42,1 @@
+-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
++  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+diff --git a/client/src/pages/events.tsx b/client/src/pages/events.tsx
+--- a/client/src/pages/events.tsx
++++ b/client/src/pages/events.tsx
+@@ -98,1 +98,1 @@
+-          <Button variant="outline" className="flex items-center space-x-2" onClick={() => setAlertOpen(true)}>
++          <Button variant="outline" className="flex items-center space-x-2" onClick={() => { setAlertOpen(true); }}>
+@@ -172,1 +172,1 @@
+-                            ? cancelMutation.mutate(event.id)
++                            ? cancelMutation.mutate(event.id)
+@@ -173,1 +173,1 @@
+-                            : registerMutation.mutate(event.id)
++                            : registerMutation.mutate(event.id); }
+diff --git a/client/src/hooks/use-toast.ts b/client/src/hooks/use-toast.ts
+--- a/client/src/hooks/use-toast.ts
++++ b/client/src/hooks/use-toast.ts
+@@ -150,1 +150,1 @@
+-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
++  const dismiss = () => { dispatch({ type: "DISMISS_TOAST", toastId: id }); }
+@@ -187,1 +187,1 @@
+-    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
++    dismiss: (toastId?: string) => { dispatch({ type: "DISMISS_TOAST", toastId }); },
+diff --git a/server/replitAuth.ts b/server/replitAuth.ts
+--- a/server/replitAuth.ts
++++ b/server/replitAuth.ts
+@@ -48,1 +48,1 @@
+-  user: any,
++  user: unknown,
+@@ -58,1 +58,1 @@
+-  claims: any,
++  claims: unknown,
+@@ -131,1 +131,1 @@
+-  const user = req.user as any;
++  const user = req.user as unknown;
+@@ -139,1 +139,1 @@
+-    return next();
++    next(); return;
+diff --git a/client/src/components/admin-revenue-dashboard.tsx b/client/src/components/admin-revenue-dashboard.tsx
+--- a/client/src/components/admin-revenue-dashboard.tsx
++++ b/client/src/components/admin-revenue-dashboard.tsx
+@@ -92,1 +92,1 @@
+-              {revenueStats?.totalClicks?.toLocaleString() || 0}
++              {revenueStats?.totalClicks.toLocaleString() || 0}
+@@ -107,1 +107,1 @@
+-              {revenueStats?.totalImpressions?.toLocaleString() || 0}
++              {revenueStats?.totalImpressions.toLocaleString() || 0}
+diff --git a/client/src/components/social-features.tsx b/client/src/components/social-features.tsx
+--- a/client/src/components/social-features.tsx
++++ b/client/src/components/social-features.tsx
+@@ -171,1 +171,1 @@
+-            onClick={() => setActiveTab(tab.id)}
++            onClick={() => { setActiveTab(tab.id); }}
+@@ -191,1 +191,1 @@
+-                onChange={(e) => setNewReview(prev => ({ ...prev, bookId: e.target.value }))}
++                onChange={(e) => { setNewReview(prev => ({ ...prev, bookId: e.target.value })); }}
+@@ -200,1 +200,1 @@
+-                      onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
++                      onClick={() => { setNewReview(prev => ({ ...prev, rating: star })); }}
+@@ -217,1 +217,1 @@
+-                onChange={(e) => setNewReview(prev => ({ ...prev, review: e.target.value }))}
++                onChange={(e) => { setNewReview(prev => ({ ...prev, review: e.target.value })); }}
+@@ -222,1 +222,1 @@
+-                onClick={() => addReviewMutation.mutate(newReview)}
++                onClick={() => { addReviewMutation.mutate(newReview); }}
+@@ -277,1 +277,1 @@
+-              <Button onClick={() => createBookClubMutation.mutate({})}>
++              <Button onClick={() => { createBookClubMutation.mutate({}); }}>
+@@ -341,1 +341,1 @@
+-                    onClick={() => joinChallengeMutation.mutate(challenge.id)}
++                    onClick={() => { joinChallengeMutation.mutate(challenge.id); }}
+diff --git a/server/gamification-service.ts b/server/gamification-service.ts
+--- a/server/gamification-service.ts
++++ b/server/gamification-service.ts
+@@ -95,1 +95,1 @@
+-        const updates: any = {
++        const updates: unknown = {
+diff --git a/client/src/components/add-book-modal.tsx b/client/src/components/add-book-modal.tsx
+--- a/client/src/components/add-book-modal.tsx
++++ b/client/src/components/add-book-modal.tsx
+@@ -44,1 +44,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -45,1 +45,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
+@@ -46,1 +46,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+diff --git a/client/src/components/book-card.tsx b/client/src/components/book-card.tsx
+--- a/client/src/components/book-card.tsx
++++ b/client/src/components/book-card.tsx
+@@ -48,1 +48,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -49,1 +49,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
+@@ -50,1 +50,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+@@ -101,1 +101,1 @@
+-            onClick={() => toggleWishlistMutation.mutate()}
++            onClick={() => { toggleWishlistMutation.mutate(); }}
+@@ -117,1 +117,1 @@
+-              onClick={() => onShare(book)}
++              onClick={() => { onShare(book); }}
+diff --git a/client/src/components/affiliate-marketing.tsx b/client/src/components/affiliate-marketing.tsx
+--- a/client/src/components/affiliate-marketing.tsx
++++ b/client/src/components/affiliate-marketing.tsx
+@@ -137,1 +137,1 @@
+-              {partnerStats?.totalClicks?.toLocaleString() || 0}
++              {partnerStats?.totalClicks.toLocaleString() || 0}
+@@ -189,1 +189,1 @@
+-              onChange={(e) => setSearchQuery(e.target.value)}
++              onChange={(e) => { setSearchQuery(e.target.value); }}
+@@ -284,1 +284,1 @@
+-                      onClick={() => handleAffiliateClick(book)}
++                      onClick={() => { handleAffiliateClick(book); }}
+diff --git a/client/src/components/search-filters.tsx b/client/src/components/search-filters.tsx
+--- a/client/src/components/search-filters.tsx
++++ b/client/src/components/search-filters.tsx
+@@ -34,1 +34,1 @@
+-              onChange={(e) => onSearchChange(e.target.value)}
++              onChange={(e) => { onSearchChange(e.target.value); }}
+diff --git a/client/src/components/event-alert-modal.tsx b/client/src/components/event-alert-modal.tsx
+--- a/client/src/components/event-alert-modal.tsx
++++ b/client/src/components/event-alert-modal.tsx
+@@ -53,1 +53,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/event-alerts"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/event-alerts"] });
+@@ -132,1 +132,1 @@
+-              onChange={(e) => setEventType(e.target.value)}
++              onChange={(e) => { setEventType(e.target.value); }}
+@@ -155,1 +155,1 @@
+-              onChange={(e) => setCity(e.target.value)}
++              onChange={(e) => { setCity(e.target.value); }}
+@@ -176,1 +176,1 @@
+-              onChange={(e) => setAuthor(e.target.value)}
++              onChange={(e) => { setAuthor(e.target.value); }}
+@@ -190,1 +190,1 @@
+-              onChange={(e) => setKeywords(e.target.value)}
++              onChange={(e) => { setKeywords(e.target.value); }}
+@@ -207,1 +207,1 @@
+-                onCheckedChange={(checked) => setEmailNotifications(checked === true)}
++                onCheckedChange={(checked) => { setEmailNotifications(checked === true); }}
+@@ -218,1 +218,1 @@
+-                onCheckedChange={(checked) => setSmsNotifications(checked === true)}
++                onCheckedChange={(checked) => { setSmsNotifications(checked === true); }}
+@@ -230,1 +230,1 @@
+-              onClick={() => onOpenChange(false)}
++              onClick={() => { onOpenChange(false); }}
+diff --git a/client/src/components/advertisement.tsx b/client/src/components/advertisement.tsx
+--- a/client/src/components/advertisement.tsx
++++ b/client/src/components/advertisement.tsx
+@@ -53,1 +53,1 @@
+-      return () => clearTimeout(timer);
++      return () => { clearTimeout(timer); };
+@@ -68,1 +68,1 @@
+-      <CardContent className="p-4" onClick={() => handleAdClick(currentAd)}>
++      <CardContent className="p-4" onClick={() => { handleAdClick(currentAd); }}>
+diff --git a/client/src/pages/price-comparison.tsx b/client/src/pages/price-comparison.tsx
+--- a/client/src/pages/price-comparison.tsx
++++ b/client/src/pages/price-comparison.tsx
+@@ -50,1 +50,1 @@
+-    onSettled: () => setIsComparing(false),
++    onSettled: () => { setIsComparing(false); },
+@@ -69,1 +69,1 @@
+-            onClick={() => compareWishlistMutation.mutate()}
++            onClick={() => { compareWishlistMutation.mutate(); }}
+diff --git a/client/src/pages/scanner.tsx b/client/src/pages/scanner.tsx
+--- a/client/src/pages/scanner.tsx
++++ b/client/src/pages/scanner.tsx
+@@ -34,1 +34,1 @@
+-              <Button onClick={() => setBarcodeOpen(true)} className="flex items-center space-x-2">
++              <Button onClick={() => { setBarcodeOpen(true); }} className="flex items-center space-x-2">
+@@ -49,1 +49,1 @@
+-              <Button onClick={() => setCameraOpen(true)} className="flex items-center space-x-2">
++              <Button onClick={() => { setCameraOpen(true); }} className="flex items-center space-x-2">
+diff --git a/client/src/components/wishlist-section.tsx b/client/src/components/wishlist-section.tsx
+--- a/client/src/components/wishlist-section.tsx
++++ b/client/src/components/wishlist-section.tsx
+@@ -21,1 +21,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -22,1 +22,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
+@@ -23,1 +23,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+@@ -98,1 +98,1 @@
+-                onClick={() => removeFromWishlistMutation.mutate(book.id)}
++                onClick={() => { removeFromWishlistMutation.mutate(book.id); }}
+diff --git a/server/routes.ts b/server/routes.ts
+--- a/server/routes.ts
++++ b/server/routes.ts
+@@ -32,1 +32,1 @@
+-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
++  app.get('/api/auth/user', isAuthenticated, async (req: unknown, res) => {
+@@ -43,1 +43,1 @@
+-  app.get("/api/books", isAuthenticated, async (req: any, res) => {
++  app.get("/api/books", isAuthenticated, async (req: unknown, res) => {
+@@ -54,1 +54,1 @@
+-  app.get("/api/books/search", isAuthenticated, async (req: any, res) => {
++  app.get("/api/books/search", isAuthenticated, async (req: unknown, res) => {
+@@ -69,1 +69,1 @@
+-  app.get("/api/books/genre/:genre", isAuthenticated, async (req: any, res) => {
++  app.get("/api/books/genre/:genre", isAuthenticated, async (req: unknown, res) => {
+@@ -81,1 +81,1 @@
+-  app.get("/api/wishlist", isAuthenticated, async (req: any, res) => {
++  app.get("/api/wishlist", isAuthenticated, async (req: unknown, res) => {
+@@ -92,1 +92,1 @@
+-  app.get("/api/stats", isAuthenticated, async (req: any, res) => {
++  app.get("/api/stats", isAuthenticated, async (req: unknown, res) => {
+@@ -103,1 +103,1 @@
+-  app.post("/api/books/add-with-ai", isAuthenticated, async (req: any, res) => {
++  app.post("/api/books/add-with-ai", isAuthenticated, async (req: unknown, res) => {
+@@ -164,1 +164,1 @@
+-  app.post("/api/books", isAuthenticated, async (req: any, res) => {
++  app.post("/api/books", isAuthenticated, async (req: unknown, res) => {
+@@ -177,1 +177,1 @@
+-  app.patch("/api/books/:id", isAuthenticated, async (req: any, res) => {
++  app.patch("/api/books/:id", isAuthenticated, async (req: unknown, res) => {
+@@ -195,1 +195,1 @@
+-  app.patch("/api/books/:id/wishlist", isAuthenticated, async (req: any, res) => {
++  app.patch("/api/books/:id/wishlist", isAuthenticated, async (req: unknown, res) => {
+@@ -212,1 +212,1 @@
+-  app.delete("/api/books/:id", isAuthenticated, async (req: any, res) => {
++  app.delete("/api/books/:id", isAuthenticated, async (req: unknown, res) => {
+@@ -229,1 +229,1 @@
+-  app.get("/api/gamification/stats", isAuthenticated, async (req: any, res) => {
++  app.get("/api/gamification/stats", isAuthenticated, async (req: unknown, res) => {
+@@ -240,1 +240,1 @@
+-  app.get("/api/achievements", isAuthenticated, async (req: any, res) => {
++  app.get("/api/achievements", isAuthenticated, async (req: unknown, res) => {
+@@ -251,1 +251,1 @@
+-  app.post("/api/reading-activity", isAuthenticated, async (req: any, res) => {
++  app.post("/api/reading-activity", isAuthenticated, async (req: unknown, res) => {
+@@ -274,1 +274,1 @@
+-  app.get("/api/wishlist/search-online", isAuthenticated, async (req: any, res) => {
++  app.get("/api/wishlist/search-online", isAuthenticated, async (req: unknown, res) => {
+@@ -327,1 +327,1 @@
+-        userId: (req as any).user?.claims?.sub || null,
++        userId: (req as unknown).user?.claims?.sub || null,
+diff --git a/client/src/components/reading-progress-tracker.tsx b/client/src/components/reading-progress-tracker.tsx
+--- a/client/src/components/reading-progress-tracker.tsx
++++ b/client/src/components/reading-progress-tracker.tsx
+@@ -44,1 +44,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/gamification/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/gamification/stats"] });
+@@ -45,1 +45,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
+@@ -46,1 +46,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -134,1 +134,1 @@
+-                onClick={() => setIsLogging(!isLogging)}
++                onClick={() => { setIsLogging(!isLogging); }}
+@@ -162,1 +162,1 @@
+-                onChange={(e) => setPagesRead(Number(e.target.value))}
++                onChange={(e) => { setPagesRead(Number(e.target.value)); }}
+diff --git a/client/src/pages/home.tsx b/client/src/pages/home.tsx
+--- a/client/src/pages/home.tsx
++++ b/client/src/pages/home.tsx
+@@ -99,1 +99,1 @@
+-              onClick={() => setAIAddOpen(true)}
++              onClick={() => { setAIAddOpen(true); }}
+@@ -175,1 +175,1 @@
+-      <AddBookModal isOpen={isAIAddOpen} onClose={() => setAIAddOpen(false)} />
++      <AddBookModal isOpen={isAIAddOpen} onClose={() => { setAIAddOpen(false); }} />
+diff --git a/client/src/components/barcode-scanner.tsx b/client/src/components/barcode-scanner.tsx
+--- a/client/src/components/barcode-scanner.tsx
++++ b/client/src/components/barcode-scanner.tsx
+@@ -91,1 +91,1 @@
+-      streamRef.current.getTracks().forEach(track => track.stop());
++      streamRef.current.getTracks().forEach(track => { track.stop(); });
+@@ -139,1 +139,1 @@
+-      lookupBookByISBN(mockISBN);
++      void lookupBookByISBN(mockISBN);
+@@ -175,1 +175,1 @@
+-    mutationFn: async (bookData: any) => {
++    mutationFn: async (bookData: unknown) => {
+@@ -183,1 +183,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -184,1 +184,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+@@ -225,1 +225,1 @@
+-      startCamera();
++      void startCamera();
+@@ -417,1 +417,1 @@
+-                      onCheckedChange={(checked) => setAddToWishlist(checked === true)}
++                      onCheckedChange={(checked) => { setAddToWishlist(checked === true); }}
+@@ -426,1 +426,1 @@
+-                      onCheckedChange={(checked) => setIsRare(checked === true)}
++                      onCheckedChange={(checked) => { setIsRare(checked === true); }}
+diff --git a/client/src/components/enhanced-export.tsx b/client/src/components/enhanced-export.tsx
+--- a/client/src/components/enhanced-export.tsx
++++ b/client/src/components/enhanced-export.tsx
+@@ -93,1 +93,1 @@
+-      navigator.clipboard.writeText(data.shareUrl);
++      void navigator.clipboard.writeText(data.shareUrl);
+@@ -151,1 +151,1 @@
+-                    onClick={() => setExportOptions(prev => ({ ...prev, format: format.id }))}
++                    onClick={() => { setExportOptions(prev => ({ ...prev, format: format.id })); }}
+@@ -170,1 +170,1 @@
+-                onChange={(e) => setExportOptions(prev => ({ ...prev, filterBy: e.target.value }))}
++                onChange={(e) => { setExportOptions(prev => ({ ...prev, filterBy: e.target.value })); }}
+@@ -184,1 +184,1 @@
+-                onChange={(e) => setExportOptions(prev => ({ ...prev, sortBy: e.target.value }))}
++                onChange={(e) => { setExportOptions(prev => ({ ...prev, sortBy: e.target.value })); }}
+@@ -222,1 +222,1 @@
+-              onClick={() => exportMutation.mutate(exportOptions)}
++              onClick={() => { exportMutation.mutate(exportOptions); }}
+@@ -240,1 +240,1 @@
+-              onClick={() => shareCollectionMutation.mutate()}
++              onClick={() => { shareCollectionMutation.mutate(); }}
+@@ -249,1 +249,1 @@
+-              onClick={() => window.print()}
++              onClick={() => { window.print(); }}
+diff --git a/server/storage.ts b/server/storage.ts
+--- a/server/storage.ts
++++ b/server/storage.ts
+@@ -73,1 +73,1 @@
+-  getTopPerformingAds(): Promise<any[]>;
++  getTopPerformingAds(): Promise<unknown[]>;
+@@ -76,1 +76,1 @@
+-  getPriceComparisons(): Promise<any[]>;
++  getPriceComparisons(): Promise<unknown[]>;
+@@ -77,1 +77,1 @@
+-  createPriceComparison(data: any): Promise<any>;
++  createPriceComparison(data: unknown): Promise<any>;
+@@ -78,1 +78,1 @@
+-  createStorePrice(data: any): Promise<any>;
++  createStorePrice(data: unknown): Promise<any>;
+@@ -79,1 +79,1 @@
+-  createPriceAlert(data: any): Promise<any>;
++  createPriceAlert(data: unknown): Promise<any>;
+@@ -80,1 +80,1 @@
+-  getPriceAlerts(userId: string): Promise<any[]>;
++  getPriceAlerts(userId: string): Promise<unknown[]>;
+@@ -278,1 +278,1 @@
+-  async getTopPerformingAds(): Promise<any[]> {
++  async getTopPerformingAds(): Promise<unknown[]> {
+@@ -296,1 +296,1 @@
+-  async getPriceComparisons(): Promise<any[]> {
++  async getPriceComparisons(): Promise<unknown[]> {
+@@ -319,1 +319,1 @@
+-  async createPriceComparison(data: any): Promise<any> {
++  async createPriceComparison(data: unknown): Promise<any> {
+@@ -327,1 +327,1 @@
+-  async createStorePrice(data: any): Promise<any> {
++  async createStorePrice(data: unknown): Promise<any> {
+@@ -335,1 +335,1 @@
+-  async createPriceAlert(data: any): Promise<any> {
++  async createPriceAlert(data: unknown): Promise<any> {
+@@ -343,1 +343,1 @@
+-  async getPriceAlerts(userId: string): Promise<any[]> {
++  async getPriceAlerts(userId: string): Promise<unknown[]> {
+@@ -353,1 +353,1 @@
+-  async updatePriceAlert(id: string, userId: string, data: any): Promise<any> {
++  async updatePriceAlert(id: string, userId: string, data: unknown): Promise<any> {
+@@ -369,1 +369,1 @@
+-  async getEvents(): Promise<any[]> {
++  async getEvents(): Promise<unknown[]> {
+@@ -380,1 +380,1 @@
+-  async getEventById(id: string): Promise<any> {
++  async getEventById(id: string): Promise<unknown> {
+@@ -390,1 +390,1 @@
+-  async createEvent(eventData: any): Promise<any> {
++  async createEvent(eventData: unknown): Promise<any> {
+@@ -398,1 +398,1 @@
+-  async registerForEvent(eventId: string, userId: string): Promise<any> {
++  async registerForEvent(eventId: string, userId: string): Promise<unknown> {
+@@ -450,1 +450,1 @@
+-  async getUserEvents(userId: string): Promise<any[]> {
++  async getUserEvents(userId: string): Promise<unknown[]> {
+diff --git a/client/src/components/smart-recommendations.tsx b/client/src/components/smart-recommendations.tsx
+--- a/client/src/components/smart-recommendations.tsx
++++ b/client/src/components/smart-recommendations.tsx
+@@ -123,1 +123,1 @@
+-          onClick={() => generateMoreMutation.mutate()}
++          onClick={() => { generateMoreMutation.mutate(); }}
+@@ -220,1 +220,1 @@
+-                    onClick={() => feedbackMutation.mutate({ id: rec.id, isInterested: true })}
++                    onClick={() => { feedbackMutation.mutate({ id: rec.id, isInterested: true }); }}
+@@ -231,1 +231,1 @@
+-                    onClick={() => feedbackMutation.mutate({ id: rec.id, isInterested: false })}
++                    onClick={() => { feedbackMutation.mutate({ id: rec.id, isInterested: false }); }}
+@@ -255,1 +255,1 @@
+-                    onClick={() => dismissMutation.mutate(rec.id)}
++                    onClick={() => { dismissMutation.mutate(rec.id); }}
+@@ -273,1 +273,1 @@
+-              <Button onClick={() => generateMoreMutation.mutate()}>
++              <Button onClick={() => { generateMoreMutation.mutate(); }}>
+diff --git a/client/src/components/camera-book-scanner.tsx b/client/src/components/camera-book-scanner.tsx
+--- a/client/src/components/camera-book-scanner.tsx
++++ b/client/src/components/camera-book-scanner.tsx
+@@ -90,1 +90,1 @@
+-      streamRef.current.getTracks().forEach(track => track.stop());
++      streamRef.current.getTracks().forEach(track => { track.stop(); });
+@@ -121,1 +121,1 @@
+-      startCamera();
++      void startCamera();
+@@ -151,1 +151,1 @@
+-    analyzeBookCover(imageData);
++    void analyzeBookCover(imageData);
+@@ -180,1 +180,1 @@
+-    mutationFn: async (bookData: any) => {
++    mutationFn: async (bookData: unknown) => {
+@@ -188,1 +188,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+@@ -189,1 +189,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+@@ -297,1 +297,1 @@
+-                      onClick={() => setShowPreview(!showPreview)}
++                      onClick={() => { setShowPreview(!showPreview); }}
+@@ -411,1 +411,1 @@
+-                      onCheckedChange={(checked) => setAddToWishlist(checked === true)}
++                      onCheckedChange={(checked) => { setAddToWishlist(checked === true); }}
+@@ -420,1 +420,1 @@
+-                      onCheckedChange={(checked) => setIsRare(checked === true)}
++                      onCheckedChange={(checked) => { setIsRare(checked === true); }}
+diff --git a/api/server.ts b/api/server.ts
+--- a/api/server.ts
++++ b/api/server.ts
+@@ -6,1 +6,1 @@
+-  return (app as any)(req, res);
++  return (app as unknown)(req, res);
+diff --git a/client/src/components/book-share-modal.tsx b/client/src/components/book-share-modal.tsx
+--- a/client/src/components/book-share-modal.tsx
++++ b/client/src/components/book-share-modal.tsx
+@@ -377,1 +377,1 @@
+-                      setShareOptions((prev) => ({ ...prev, template: value }))
++                      { setShareOptions((prev) => ({ ...prev, template: value })); }
+@@ -399,1 +399,1 @@
+-                      setShareOptions((prev) => ({ ...prev, colorScheme: value }))
++                      { setShareOptions((prev) => ({ ...prev, colorScheme: value })); }
+@@ -421,1 +421,1 @@
+-                      setShareOptions((prev) => ({ ...prev, fontSize: value }))
++                      { setShareOptions((prev) => ({ ...prev, fontSize: value })); }
+@@ -441,1 +441,1 @@
+-                      setShareOptions((prev) => ({ ...prev, logoPosition: value }))
++                      { setShareOptions((prev) => ({ ...prev, logoPosition: value })); }
+@@ -463,1 +463,1 @@
+-                    onChange={(e) => setShareOptions(prev => ({ ...prev, customQuote: e.target.value }))}
++                    onChange={(e) => { setShareOptions(prev => ({ ...prev, customQuote: e.target.value })); }}
+@@ -475,1 +475,1 @@
+-                      onChange={(e) => setShareOptions(prev => ({ ...prev, includeRating: e.target.checked }))}
++                      onChange={(e) => { setShareOptions(prev => ({ ...prev, includeRating: e.target.checked })); }}
+@@ -486,1 +486,1 @@
+-                      onChange={(e) => setShareOptions(prev => ({ ...prev, includeReview: e.target.checked }))}
++                      onChange={(e) => { setShareOptions(prev => ({ ...prev, includeReview: e.target.checked })); }}
+@@ -563,1 +563,1 @@
+-                        onClick={() => shareToSocialMedia('twitter')}
++                        onClick={() => { shareToSocialMedia('twitter'); }}
+@@ -571,1 +571,1 @@
+-                        onClick={() => shareToSocialMedia('facebook')}
++                        onClick={() => { shareToSocialMedia('facebook'); }}
+@@ -579,1 +579,1 @@
+-                        onClick={() => shareToSocialMedia('linkedin')}
++                        onClick={() => { shareToSocialMedia('linkedin'); }}
+@@ -587,1 +587,1 @@
+-                        onClick={() => shareToSocialMedia('whatsapp')}
++                        onClick={() => { shareToSocialMedia('whatsapp'); }}
+diff --git a/client/src/components/price-alert-modal.tsx b/client/src/components/price-alert-modal.tsx
+--- a/client/src/components/price-alert-modal.tsx
++++ b/client/src/components/price-alert-modal.tsx
+@@ -40,1 +40,1 @@
+-    mutationFn: async (data: any) => {
++    mutationFn: async (data: unknown) => {
+@@ -48,1 +48,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/price-alerts"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/price-alerts"] });
+@@ -146,1 +146,1 @@
+-                onChange={(e) => setTargetPrice(Number(e.target.value))}
++                onChange={(e) => { setTargetPrice(Number(e.target.value)); }}
+@@ -170,1 +170,1 @@
+-                onChange={(e) => setEmail(e.target.value)}
++                onChange={(e) => { setEmail(e.target.value); }}
+@@ -181,1 +181,1 @@
+-                onChange={(e) => setSmsNumber(e.target.value)}
++                onChange={(e) => { setSmsNumber(e.target.value); }}
+diff --git a/client/src/components/advanced-analytics.tsx b/client/src/components/advanced-analytics.tsx
+--- a/client/src/components/advanced-analytics.tsx
++++ b/client/src/components/advanced-analytics.tsx
+@@ -133,1 +133,1 @@
+-              {bookAnalytics?.popularBooks?.map((book: any, index: number) => (
++              {bookAnalytics?.popularBooks.map((book: any, index: number) => (
+@@ -166,1 +166,1 @@
+-              {bookAnalytics?.genreDistribution?.map((genre: any) => (
++              {bookAnalytics?.genreDistribution.map((genre: any) => (
+@@ -194,1 +194,1 @@
+-            {geographicData?.regions?.map((region: any) => (
++            {geographicData?.regions.map((region: any) => (
+@@ -233,1 +233,1 @@
+-                {userAnalytics?.peakHours?.map((hour: any) => (
++                {userAnalytics?.peakHours.map((hour: any) => (
+@@ -252,1 +252,1 @@
+-                {userAnalytics?.deviceTypes?.map((device: any) => (
++                {userAnalytics?.deviceTypes?.map((device: unknown) => (
+diff --git a/client/src/components/navigation-bar.tsx b/client/src/components/navigation-bar.tsx
+--- a/client/src/components/navigation-bar.tsx
++++ b/client/src/components/navigation-bar.tsx
+@@ -32,1 +32,1 @@
+-    { path: "/premium", icon: Crown, label: t.premium, color: "text-amber-500", badge: (user as any)?.subscriptionTier === 'free' ? 'Upgrade' : null },
++    { path: "/premium", icon: Crown, label: t.premium, color: "text-amber-500", badge: (user as unknown)?.subscriptionTier === 'free' ? 'Upgrade' : null },
+@@ -121,1 +121,1 @@
+-            onClick={() => setIsMenuOpen(!isMenuOpen)}
++            onClick={() => { setIsMenuOpen(!isMenuOpen); }}
+@@ -137,1 +137,1 @@
+-                    onClick={() => setIsMenuOpen(false)}
++                    onClick={() => { setIsMenuOpen(false); }}

@@ -41,9 +41,9 @@ export default function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       return apiRequest("POST", "/api/books/add-with-ai", data);
     },
     onSuccess: (newBook) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/books"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+     void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+     void queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
+     void queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
         title: "Boek bygevoeg!",
         description: `"${newBook.title}" is suksesvol bygevoeg met AI-voorspelde genre: ${newBook.genre}`,
