@@ -1,0 +1,156 @@
+diff --git a/client/src/components/admin-revenue-dashboard.tsx b/client/src/components/admin-revenue-dashboard.tsx
+--- a/client/src/components/admin-revenue-dashboard.tsx
++++ b/client/src/components/admin-revenue-dashboard.tsx
+@@ -119,1 +119,1 @@
+-            {topAds?.map((ad: any, index: number) => (
++            {topAds?.map((ad: unknown, index: number) => (
+diff --git a/client/src/components/social-features.tsx b/client/src/components/social-features.tsx
+--- a/client/src/components/social-features.tsx
++++ b/client/src/components/social-features.tsx
+@@ -183,1 +183,1 @@
+-            {reviews?.map((review: any) => (
++            {reviews?.map((review: unknown) => (
+@@ -236,1 +236,1 @@
+-            {bookClubs?.map((club: any) => (
++            {bookClubs?.map((club: unknown) => (
+@@ -266,1 +266,1 @@
+-            {challenges?.map((challenge: any) => (
++            {challenges?.map((challenge: unknown) => (
+@@ -314,1 +314,1 @@
+-            {badges?.map((badge: any) => (
++            {badges?.map((badge: unknown) => (
+@@ -350,1 +350,1 @@
+-              {leaderboard?.map((user: any, index: number) => (
++              {leaderboard?.map((user: unknown, index: number) => (
+diff --git a/client/src/components/wishlist-search.tsx b/client/src/components/wishlist-search.tsx
+--- a/client/src/components/wishlist-search.tsx
++++ b/client/src/components/wishlist-search.tsx
+@@ -66,1 +66,1 @@
+-          {searchResults.map((result: any, index: number) => (
++          {searchResults.map((result: unknown, index: number) => (
+@@ -87,1 +87,1 @@
+-                    {result.suggestedSites.map((site: any, siteIndex: number) => (
++                    {result.suggestedSites.map((site: unknown, siteIndex: number) => (
+@@ -108,1 +108,1 @@
+-                    {result.searchUrls.slice(0, 2).map((search: any, searchIndex: number) => (
++                    {result.searchUrls.slice(0, 2).map((search: unknown, searchIndex: number) => (
+diff --git a/client/src/components/event-alert-modal.tsx b/client/src/components/event-alert-modal.tsx
+--- a/client/src/components/event-alert-modal.tsx
++++ b/client/src/components/event-alert-modal.tsx
+@@ -199,1 +199,1 @@
+-                onCheckedChange={(checked: CheckedState) => setEmailNotifications(checked === true)}
++                onCheckedChange={(checked: CheckedState) => { setEmailNotifications(checked === true); }}
+@@ -210,1 +210,1 @@
+-                onCheckedChange={(checked: CheckedState) => setSmsNotifications(checked === true)}
++                onCheckedChange={(checked: CheckedState) => { setSmsNotifications(checked === true); }}
+diff --git a/client/src/pages/home.tsx b/client/src/pages/home.tsx
+--- a/client/src/pages/home.tsx
++++ b/client/src/pages/home.tsx
+@@ -163,1 +163,1 @@
+-                  booksQuery.refetch();
++                  void booksQuery.refetch();
+@@ -164,1 +164,1 @@
+-                  statsQuery.refetch();
++                  void statsQuery.refetch();
+diff --git a/client/src/pages/price-alerts.tsx b/client/src/pages/price-alerts.tsx
+--- a/client/src/pages/price-alerts.tsx
++++ b/client/src/pages/price-alerts.tsx
+@@ -48,1 +48,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/price-alerts"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/price-alerts"] });
+@@ -186,1 +186,1 @@
+-                      onClick={() => deleteAlertMutation.mutate(alert.id)}
++                      onClick={() => { deleteAlertMutation.mutate(alert.id); }}
+@@ -206,1 +206,1 @@
+-          onClose={() => setModalOpen(false)}
++          onClose={() => { setModalOpen(false); }}
+diff --git a/client/src/components/camera-book-scanner.tsx b/client/src/components/camera-book-scanner.tsx
+--- a/client/src/components/camera-book-scanner.tsx
++++ b/client/src/components/camera-book-scanner.tsx
+@@ -182,1 +182,1 @@
+-    mutationFn: async (bookData: any) => {
++    mutationFn: async (bookData: unknown) => {
+@@ -423,1 +423,1 @@
+-                    onCheckedChange={(checked: CheckedState) => setAddToWishlist(checked === true)}
++                    onCheckedChange={(checked: CheckedState) => { setAddToWishlist(checked === true); }}
+@@ -432,1 +432,1 @@
+-                    onCheckedChange={(checked: CheckedState) => setIsRare(checked === true)}
++                    onCheckedChange={(checked: CheckedState) => { setIsRare(checked === true); }}
+diff --git a/client/src/pages/events.tsx b/client/src/pages/events.tsx
+--- a/client/src/pages/events.tsx
++++ b/client/src/pages/events.tsx
+@@ -68,1 +68,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/events/my-events"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/events/my-events"] });
+@@ -69,1 +69,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+@@ -118,1 +118,1 @@
+-          <Button variant="outline" onClick={() => setAlertsOpen(true)}>
++          <Button variant="outline" onClick={() => { setAlertsOpen(true); }}>
+@@ -225,1 +225,1 @@
+-                            onClick={() => cancelMutation.mutate(event.id)}
++                            onClick={() => { cancelMutation.mutate(event.id); }}
+@@ -238,1 +238,1 @@
+-                          onClick={() => registerMutation.mutate(event.id)}
++                          onClick={() => { registerMutation.mutate(event.id); }}
+diff --git a/client/src/components/advanced-analytics.tsx b/client/src/components/advanced-analytics.tsx
+--- a/client/src/components/advanced-analytics.tsx
++++ b/client/src/components/advanced-analytics.tsx
+@@ -113,1 +113,1 @@
+-              {bookAnalytics?.popularBooks?.map((book: any, index: number) => (
++              {bookAnalytics?.popularBooks?.map((book: unknown, index: number) => (
+@@ -146,1 +146,1 @@
+-              {bookAnalytics?.genreDistribution?.map((genre: any) => (
++              {bookAnalytics?.genreDistribution?.map((genre: unknown) => (
+@@ -174,1 +174,1 @@
+-            {geographicData?.regions?.map((region: any) => (
++            {geographicData?.regions?.map((region: unknown) => (
+@@ -213,1 +213,1 @@
+-                {userAnalytics?.peakHours?.map((hour: any) => (
++                {userAnalytics?.peakHours?.map((hour: unknown) => (
+@@ -232,1 +232,1 @@
+-                {userAnalytics?.deviceTypes?.map((device: any) => (
++                {userAnalytics?.deviceTypes?.map((device: unknown) => (
+diff --git a/client/src/pages/price-comparison.tsx b/client/src/pages/price-comparison.tsx
+--- a/client/src/pages/price-comparison.tsx
++++ b/client/src/pages/price-comparison.tsx
+@@ -33,1 +33,1 @@
+-      queryClient.invalidateQueries({ queryKey: ["/api/price-comparison"] });
++      void queryClient.invalidateQueries({ queryKey: ["/api/price-comparison"] });
+@@ -69,1 +69,1 @@
+-              onClick={() => compareMutation.mutate()}
++              onClick={() => { compareMutation.mutate(); }}
+@@ -107,1 +107,1 @@
+-              <Button onClick={() => compareMutation.mutate()} disabled={compareMutation.isPending}>
++              <Button onClick={() => { compareMutation.mutate(); }} disabled={compareMutation.isPending}>
+diff --git a/client/src/pages/scanner.tsx b/client/src/pages/scanner.tsx
+--- a/client/src/pages/scanner.tsx
++++ b/client/src/pages/scanner.tsx
+@@ -58,1 +58,1 @@
+-                  <Button onClick={() => setBarcodeOpen(true)} className="w-full sm:w-auto">
++                  <Button onClick={() => { setBarcodeOpen(true); }} className="w-full sm:w-auto">
+@@ -69,1 +69,1 @@
+-                  <Button onClick={() => setCameraOpen(true)} className="w-full sm:w-auto">
++                  <Button onClick={() => { setCameraOpen(true); }} className="w-full sm:w-auto">
+diff --git a/client/src/components/barcode-scanner.tsx b/client/src/components/barcode-scanner.tsx
+--- a/client/src/components/barcode-scanner.tsx
++++ b/client/src/components/barcode-scanner.tsx
+@@ -176,1 +176,1 @@
+-    mutationFn: async (bookData: any) => {
++    mutationFn: async (bookData: unknown) => {
+@@ -419,1 +419,1 @@
+-                    onCheckedChange={(checked: CheckedState) => setAddToWishlist(checked === true)}
++                    onCheckedChange={(checked: CheckedState) => { setAddToWishlist(checked === true); }}
+@@ -428,1 +428,1 @@
+-                    onCheckedChange={(checked: CheckedState) => setIsRare(checked === true)}
++                    onCheckedChange={(checked: CheckedState) => { setIsRare(checked === true); }}
+diff --git a/client/src/components/enhanced-export.tsx b/client/src/components/enhanced-export.tsx
+--- a/client/src/components/enhanced-export.tsx
++++ b/client/src/components/enhanced-export.tsx
+@@ -66,1 +66,1 @@
+-      navigator.clipboard.writeText(data.shareUrl);
++      void navigator.clipboard.writeText(data.shareUrl);
+@@ -257,1 +257,1 @@
+-            {exportHistory?.map((export_item: any) => (
++            {exportHistory?.map((export_item: unknown) => (
